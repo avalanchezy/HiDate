@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -N HiDate_discovery
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=32gb
+#PBS -l walltime=08:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_DISCOVERY_RUN_DIR="${HIDATE_DISCOVERY_RUN_DIR:-runs/hidate/pbs/discovery}"
+export HIDATE_DISCOVERY_QUERIES="${HIDATE_DISCOVERY_QUERIES:-data/processed/hidate/queries-exact.jsonl}"
+export HIDATE_DISCOVERY_QUERY_EMBEDDINGS_DIR="${HIDATE_DISCOVERY_QUERY_EMBEDDINGS_DIR:-data/index/hidate/queries-exact}"
+export HIDATE_DISCOVERY_OUTPUT_DIR="${HIDATE_DISCOVERY_OUTPUT_DIR:-runs/hidate/discovery/exact-train-valid}"
+mkdir -p "$HIDATE_DISCOVERY_RUN_DIR"
+exec > "$HIDATE_DISCOVERY_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_DISCOVERY_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os
+from pathlib import Path
+path = Path(os.environ["HIDATE_DISCOVERY_OUTPUT_DIR"]) / "discovery.json"
+manifest = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+exit_code = int(os.environ["HIDATE_DISCOVERY_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "discovery_manifest_present": path.exists(),
+          "discovery_complete": exit_code == 0 and manifest.get("complete", False),
+          "training_runs": 0, "model_inference_runs": 0}
+for key in ("queries", "retrieval_runs", "cache_hits", "current_chunk_scoring_count", "queries_by_split", "queries_by_variant", "wall_seconds"):
+    if key in manifest:
+        record[key] = manifest[key]
+Path(os.environ["HIDATE_DISCOVERY_RUN_DIR"]).joinpath("completion.json").write_text(
+    json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+}
+trap finish EXIT
+python -X utf8 scripts/discover_candidates.py --index-dir data/index/hidate \
+    --queries "$HIDATE_DISCOVERY_QUERIES" --query-embeddings-dir "$HIDATE_DISCOVERY_QUERY_EMBEDDINGS_DIR" \
+    --prepared-dir data/processed/hidate --source-dir data/raw/hidate/full \
+    --output-dir "$HIDATE_DISCOVERY_OUTPUT_DIR" --splits train valid

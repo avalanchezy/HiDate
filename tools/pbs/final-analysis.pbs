@@ -1,0 +1,42 @@
+#!/bin/bash
+#PBS -N HiDate_final_analysis
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=32gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export HIDATE_ANALYSIS_RUN_DIR="${HIDATE_ANALYSIS_RUN_DIR:-runs/hidate/pbs/final-analysis}"
+export HIDATE_ANALYSIS_OUTPUT_DIR="${HIDATE_ANALYSIS_OUTPUT_DIR:-runs/hidate/analysis}"
+export HIDATE_ANALYSIS_REPORT="${HIDATE_ANALYSIS_REPORT:-reports/hidate-final-results.md}"
+mkdir -p "$HIDATE_ANALYSIS_RUN_DIR"
+exec > "$HIDATE_ANALYSIS_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_ANALYSIS_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os
+from pathlib import Path
+path = Path(os.environ["HIDATE_ANALYSIS_OUTPUT_DIR"]) / "analysis.json"
+manifest = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+exit_code = int(os.environ["HIDATE_ANALYSIS_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "analysis_complete": exit_code == 0 and manifest.get("complete", False),
+          "training_runs": 0, "model_forward_calls": 0}
+for key in ("sample_counts", "bootstrap_seed", "bootstrap_draws", "wall_seconds"):
+    if key in manifest:
+        record[key] = manifest[key]
+Path(os.environ["HIDATE_ANALYSIS_RUN_DIR"]).joinpath("completion.json").write_text(
+    json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+    if [ "$HIDATE_ANALYSIS_EXIT_CODE" -eq 0 ]; then
+        tar -czf hidate-final-analysis.tar.gz "$HIDATE_ANALYSIS_OUTPUT_DIR" "$HIDATE_ANALYSIS_REPORT"
+    fi
+}
+trap finish EXIT
+python -X utf8 scripts/analyze_final.py --output-dir "$HIDATE_ANALYSIS_OUTPUT_DIR" --report "$HIDATE_ANALYSIS_REPORT"

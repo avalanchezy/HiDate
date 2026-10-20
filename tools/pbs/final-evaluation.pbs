@@ -1,0 +1,53 @@
+#!/bin/bash
+#PBS -N HiDate_final
+#PBS -q gpu
+#PBS -l nodes=1:ppn=1:gpus=1,mem=32gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_FINAL_OUTPUT_DIR="${HIDATE_FINAL_OUTPUT_DIR:-runs/hidate/final}"
+mkdir -p "$HIDATE_FINAL_OUTPUT_DIR"
+exec > "$HIDATE_FINAL_OUTPUT_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_FINAL_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+run = Path(os.environ["HIDATE_FINAL_OUTPUT_DIR"])
+path = run / "evaluation.json"
+manifest = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+exit_code = int(os.environ["HIDATE_FINAL_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "evaluation_present": path.exists(), "evaluation_complete": exit_code == 0 and manifest.get("complete", False),
+          "output_dir": str(run), "training_runs": 0, "dev_updates": 0}
+for key in ("phase", "retrieval_rows_by_scope", "expected_retrieval_rows_by_scope", "reader_calls", "expected_reader_calls",
+            "conditions", "logical_pair_requests", "physical_pair_count", "reranker_model_call_count",
+            "reranker_encoded_input_tokens", "reranker_padded_token_slots", "reranker_wall_seconds_with_cuda_sync",
+            "reranker_sdpa_backend", "condition_pair_requests", "condition_requested_input_tokens",
+            "scope_variant_condition_pair_requests", "scope_variant_condition_requested_input_tokens",
+            "reader_work", "devices", "model_pins", "policy_path", "ranker_path", "reranker_released_before_reader"):
+    if key in manifest:
+        record[key] = manifest[key]
+(run / "completion.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+    if [ "$HIDATE_FINAL_EXIT_CODE" -eq 0 ]; then
+        tar -czf hidate-final-evaluation.tar.gz "$HIDATE_FINAL_OUTPUT_DIR"
+    fi
+}
+trap finish EXIT
+python -X utf8 scripts/evaluate_final.py \
+    --queries data/processed/hidate/queries-exact.jsonl data/processed/hidate/queries-paraphrase.jsonl \
+    --lawqa-queries data/processed/hidate/lawqa-retrieval-queries.jsonl \
+    --questions data/processed/hidate/lawqa-external.jsonl \
+    --discovery-root "${HIDATE_FINAL_DISCOVERY_ROOT:-runs/hidate/final-discovery}" \
+    --chunks data/index/hidate/chunks.jsonl --stack models/ruri/model-stack.json \
+    --policy "${HIDATE_FINAL_POLICY:-runs/hidate/policy/frozen.json}" \
+    --preflight runs/hidate/pbs/preflight/preflight.json --output-dir "$HIDATE_FINAL_OUTPUT_DIR"

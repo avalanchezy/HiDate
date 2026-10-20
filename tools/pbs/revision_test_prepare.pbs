@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N HIDATE_revisionTestPrep
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=16gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
+export HIDATE_REVISION_TEST_OUTPUT="${HIDATE_REVISION_TEST_OUTPUT:-data/processed/hidate-holdout/confirmatory}"
+mkdir -p "$HIDATE_REVISION_TEST_OUTPUT"
+exec > "$HIDATE_REVISION_TEST_OUTPUT/prepare-run.log" 2>&1
+finish() {
+    export HIDATE_PREPARE_EXIT_CODE=$?
+    python -X utf8 - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+root = Path(os.environ['HIDATE_REVISION_TEST_OUTPUT'])
+path = root / 'preparation.json'
+saved = json.loads(path.read_text()) if path.exists() else {}
+receipt = {'job_id': os.environ.get('PBS_JOBID'), 'exit_code': int(os.environ['HIDATE_PREPARE_EXIT_CODE']),
+           'complete': int(os.environ['HIDATE_PREPARE_EXIT_CODE']) == 0 and saved.get('complete', False),
+           'finished_at_utc': datetime.now(timezone.utc).isoformat(),
+           'training_runs': 0, 'model_inference_runs': 0, 'evaluation_runs': 0}
+if receipt['complete']:
+    receipt['statistics'] = saved['statistics']
+(root / 'completion.json').write_text(json.dumps(receipt, indent=2)+'\n')
+PY
+}
+trap finish EXIT
+python -X utf8 scripts/prepare_revision_test.py \
+    --family-manifest "${HIDATE_REVISION_FAMILY_MANIFEST:-data/processed/hidate-holdout/family-manifest.json}" \
+    --scale-index "${HIDATE_REVISION_SCALE_INDEX:-data/index/hidate/extended-benchmark/scale}" \
+    --output "$HIDATE_REVISION_TEST_OUTPUT"

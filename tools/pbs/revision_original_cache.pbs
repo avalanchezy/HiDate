@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N HIDATE_original_cache
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=16gb
+#PBS -l walltime=00:30:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4 CUDA_VISIBLE_DEVICES=""
+out=runs/hidate/revision-aware/transfer/ruri-original-native
+mkdir -p "$out"
+exec > "$out/run.log" 2>&1
+python -X utf8 scripts/prepare_revision_original_cache.py --output "$out"

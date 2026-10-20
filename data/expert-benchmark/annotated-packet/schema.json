@@ -1,0 +1,229 @@
+{
+  "packet_version": "v1",
+  "encoding": "CSV: UTF-8 BOM; JSONL: UTF-8",
+  "missing_value": "Blank CSV cells become null in JSONL; missing is not false or zero.",
+  "authoritative_edit_format": "CSV; sync regenerates JSONL from the edited CSV files.",
+  "date_format": "YYYY-MM-DD; source_retrieved_at uses ISO 8601 if available.",
+  "question_template_rule": "Human-written Japanese question containing {{target_date}} exactly once.",
+  "gold_set_logic": "Within one gold_set_id, all required address rows are jointly needed; different gold_set_id values are alternative sufficient sets. Add rows for multiple addresses; no single-gold-address restriction.",
+  "tables": {
+    "01_scenarios_author": {
+      "fields": [
+        "scenario_id",
+        "category",
+        "category_zh",
+        "category_ja",
+        "evaluation_design",
+        "assigned_family_id",
+        "assigned_law_id",
+        "assigned_law_title",
+        "author_id",
+        "question_template_ja",
+        "facts_ja",
+        "drafted_independently",
+        "no_model_results_seen",
+        "not_96char_quote_paraphrase",
+        "author_status",
+        "author_note"
+      ],
+      "machine_filled": [
+        "scenario_id",
+        "category",
+        "category_zh",
+        "category_ja",
+        "evaluation_design",
+        "assigned_family_id",
+        "assigned_law_id",
+        "assigned_law_title"
+      ]
+    },
+    "02_date_instances_review": {
+      "fields": [
+        "question_id",
+        "scenario_id",
+        "date_role",
+        "target_date",
+        "date_origin",
+        "date_applicability_verified",
+        "evidence_reviewer_id",
+        "answerability",
+        "answer_form",
+        "reference_answer_ja",
+        "answer_key_points_ja",
+        "insufficiency_reason_ja",
+        "review_status",
+        "review_note"
+      ],
+      "machine_filled": [
+        "question_id",
+        "scenario_id",
+        "date_role",
+        "target_date",
+        "date_origin"
+      ]
+    },
+    "03_evidence_labels": {
+      "fields": [
+        "evidence_id",
+        "question_id",
+        "gold_set_id",
+        "law_id",
+        "legal_scope",
+        "article_number",
+        "paragraph_item_path",
+        "address_role",
+        "revision_id",
+        "binding_status",
+        "effective_start",
+        "effective_end",
+        "effective_date_basis_url",
+        "source_snapshot_date",
+        "source_retrieved_at",
+        "official_source_url",
+        "local_source_path",
+        "support_span_ja",
+        "evidence_verified_by",
+        "evidence_status"
+      ],
+      "machine_filled": [
+        "evidence_id",
+        "question_id"
+      ]
+    },
+    "04_real_date_pairs": {
+      "fields": [
+        "pair_id",
+        "scenario_id",
+        "before_question_id",
+        "after_question_id",
+        "planned_relation_quota",
+        "verified_answer_relation",
+        "amendment_law_id",
+        "amendment_effective_date",
+        "amendment_source_url",
+        "distinct_versions_verified",
+        "same_facts_verified",
+        "relation_reason_ja",
+        "pair_reviewer_id",
+        "pair_status"
+      ],
+      "machine_filled": [
+        "pair_id",
+        "scenario_id",
+        "before_question_id",
+        "after_question_id",
+        "planned_relation_quota"
+      ]
+    },
+    "05_disagreements": {
+      "fields": [
+        "review_id",
+        "scenario_id",
+        "question_id",
+        "field_in_dispute",
+        "author_or_first_label",
+        "second_reviewer_label",
+        "resolution",
+        "resolution_source_url",
+        "adjudicator_id",
+        "resolution_status"
+      ],
+      "machine_filled": []
+    }
+  },
+  "enums": {
+    "category": [
+      "old_terms",
+      "real_world",
+      "changed_conditions",
+      "insufficient_evidence"
+    ],
+    "evaluation_design": [
+      "single_date",
+      "paired_dates"
+    ],
+    "date_role": [
+      "single",
+      "before",
+      "after"
+    ],
+    "human_confirmations": [
+      "yes",
+      "no"
+    ],
+    "author_status": [
+      "template_pending_author",
+      "draft",
+      "ready_for_review"
+    ],
+    "review_status": [
+      "pending_human_review",
+      "needs_revision",
+      "disagreement",
+      "verified"
+    ],
+    "answerability": [
+      "answerable",
+      "insufficient_target_version_missing",
+      "insufficient_binding_ambiguous",
+      "insufficient_material_evidence",
+      "insufficient_facts",
+      "out_of_scope"
+    ],
+    "answer_form": [
+      "affirmative",
+      "negative",
+      "rule_changed",
+      "calculation",
+      "mixed",
+      "not_applicable"
+    ],
+    "address_role": [
+      "direct_answer",
+      "necessary_definition",
+      "exception",
+      "context_only"
+    ],
+    "binding_status": [
+      "available",
+      "missing",
+      "ambiguous"
+    ],
+    "evidence_status": [
+      "pending_human_evidence",
+      "located_not_verified",
+      "verified",
+      "unavailable_documented"
+    ],
+    "planned_relation_quota": [
+      "changed",
+      "unchanged"
+    ],
+    "verified_answer_relation": [
+      "changed",
+      "unchanged",
+      "not_evaluable"
+    ],
+    "pair_status": [
+      "planned_not_verified",
+      "needs_revision",
+      "verified",
+      "not_evaluable"
+    ],
+    "resolution_status": [
+      "open",
+      "resolved"
+    ]
+  },
+  "date_meanings": {
+    "target_date": "Date asked about in the actual question, not download time.",
+    "effective_start": "Legally applicable start supported by official enforcement/supplementary provisions.",
+    "effective_end": "Legally applicable end if officially established; leave blank if not established.",
+    "amendment_effective_date": "Relevant amendment enforcement date, not promulgation or first observed capture.",
+    "source_snapshot_date": "Date requested for the saved e-Gov response/snapshot; not an inferred effective start.",
+    "source_retrieved_at": "Actual acquisition timestamp, if supplied by the source record."
+  },
+  "human_owned_fields": "Questions, case-specific date applicability, gold addresses/versions/spans, answers, verified relations and reviewer identities are supplied by annotators. Assigned laws and target dates are derived from official metadata.",
+  "pair_rule": "Same Japanese base question and facts; replace only target_date. Both dates must be real and straddle a verified revision; both answers must have evidence for the primary changed/unchanged analysis.",
+  "insufficiency_rule": "An evidenced negative answer or statement that an old condition changed is answerable. It is not missing evidence."
+}

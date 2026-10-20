@@ -1,0 +1,319 @@
+{
+  "protocol_id": "hidate-core-mechanisms",
+  "seed": 42,
+  "training_seeds": [42],
+  "split": "original_single_family_train_valid_test",
+  "research_questions": {
+    "D": "Does historical discovery recover useful addresses beyond as-of-only retrieval?",
+    "L": "Does learned address ranking improve selection within the same complete address pool?",
+    "B": "For fixed selected addresses, does realizing evidence at the requested date improve answers?"
+  },
+  "inputs": {
+    "japanese_protocol": "configs/retrieval-protocol.json",
+    "family_split": "data/processed/hidate/family-split.json",
+    "exact_queries": "data/processed/hidate/queries-exact.jsonl",
+    "paraphrase_queries": "data/processed/hidate/queries-paraphrase.jsonl",
+    "target_addresses": "data/processed/hidate/target-addresses.jsonl",
+    "original_ranker": "runs/hidate/ranker/address-model.json",
+    "original_policy": "runs/hidate/policy/frozen.json",
+    "saved_valid_reranking": "runs/hidate/dev/reranked.jsonl",
+    "saved_test_reranking": "runs/hidate/final/retrieval.jsonl",
+    "asof_discovery": [
+      "runs/hidate/mechanism-analysis/asof-discovery/exact/candidates.jsonl",
+      "runs/hidate/mechanism-analysis/asof-discovery/paraphrase/candidates.jsonl"
+    ],
+    "saved_pair_receipts": [
+      "runs/hidate/dev/model-pair-receipts.jsonl",
+      "runs/hidate/final/model-pair-receipts.jsonl"
+    ],
+    "fiscal_protocol": "configs/fiscal_protocol.json",
+    "fiscal_questions": "data/processed/fiscal/questions.jsonl",
+    "fiscal_articles": "data/processed/fiscal/articles.jsonl",
+    "fiscal_nuggets": "data/processed/fiscal/nuggets.jsonl",
+    "fiscal_retrieval_metadata": "runs/hidate/fiscal-transfer/fiscal-retrieval/retrieval.json",
+    "fiscal_saved_retrieval": "runs/hidate/fiscal-transfer/fiscal-retrieval/retrieval.jsonl",
+    "fiscal_saved_responses": "runs/hidate/fiscal-transfer/fiscal/responses.jsonl",
+    "fiscal_saved_reader_receipts": "runs/hidate/fiscal-transfer/fiscal/reader-receipts.jsonl",
+    "official_fiscal_scorer": "data/raw/fiscal/official/scripts/score_nuggets.py"
+  },
+  "japanese_common": {
+    "stack": "original_frozen_ruri",
+    "model_pin_source": "original_model_stack_and_completion_receipts",
+    "query_variants": ["exact_quote", "generated_paraphrase"],
+    "query_counts_both_variants": {"train": 14030, "valid": 2490, "test": 3172},
+    "corpus_scope": "all_original_source_role_families_independent_of_query_split",
+    "chunk_tokens": 448,
+    "chunk_overlap_tokens": 64,
+    "bm25_top_chunk_hits": 50,
+    "dense_top_chunk_hits": 50,
+    "fused_top_chunk_hits": 50,
+    "rrf_k": 60,
+    "neural_reranker_max_distinct_parents": 10,
+    "final_max_distinct_parents": 4,
+    "reader_prompt_tokens": 4096,
+    "alpha": 0.75,
+    "alpha_selection": "fixed_original_ruri_policy",
+    "address_identity": "discovery.chunk_address",
+    "binding": "original_official_derived_dated_binding",
+    "current_representative": "maximum_query_cosine_over_all_eligible_chunks_of_bound_parent_then_chunk_id",
+    "pool_features": "per_revision_max_chunk_rrf_then_original_aggregate_history_and_FEATURE_NAMES",
+    "missing_rank": 51,
+    "address_preselection_tie_break": "canonical_address_tuple_ascending",
+    "final_tie_break": ["selection_rank_ascending", "chunk_id_ascending"],
+    "physical_pair_reuse": "exact_raw_query_document_and_original_model_tokenizer_scoring_contract",
+    "empty_or_short_pool": "retain_actual_size_without_duplicate_or_oracle_fill"
+  },
+  "factorial": {
+    "factors": {"D": ["A_asof", "H_history_at_or_before_T"], "L": ["fixed", "learned"]},
+    "conditions": [
+      {
+        "id": "A0",
+        "discovery": "asof_only",
+        "learned": false,
+        "pool_source": "saved_asof_hybrid_top50_chunk_hits",
+        "address_reconstruction": "AsOfAddressReconstructor",
+        "feature_scope": "asof_hits_and_asof_only_metadata_view",
+        "preselection": "descending_max_address_rrf_then_canonical_address",
+        "learned_term": 0.0,
+        "fusion": "0.75 * 0.0 + 0.25 * reranker_sigmoid",
+        "fit_runs": 0,
+        "reuse_old_asof_hybrid_final_selection": false
+      },
+      {
+        "id": "A1",
+        "discovery": "asof_only",
+        "learned": true,
+        "pool_source": "exact_same_complete_pool_as_A0",
+        "address_reconstruction": "AsOfAddressReconstructor",
+        "feature_scope": "asof_hits_and_asof_only_metadata_view",
+        "preselection": "descending_asof_train_probability_then_canonical_address",
+        "fusion": "0.75 * asof_train_probability + 0.25 * reranker_sigmoid",
+        "ranker_id": "A1_asof_train_once",
+        "fit_runs": 1
+      },
+      {
+        "id": "H0",
+        "discovery": "history_at_or_before_T",
+        "learned": false,
+        "pool_source": "original_complete_history_address_pool",
+        "preselection": "descending_max_address_rrf_then_canonical_address",
+        "learned_term": 0.0,
+        "fusion": "0.75 * 0.0 + 0.25 * reranker_sigmoid",
+        "fit_runs": 0,
+        "saved_condition": "history_bound",
+        "reuse": "original_reranked_candidates_and_final_order"
+      },
+      {
+        "id": "H1",
+        "discovery": "history_at_or_before_T",
+        "learned": true,
+        "pool_source": "exact_same_complete_pool_as_H0",
+        "preselection": "descending_original_train_probability_then_canonical_address",
+        "fusion": "0.75 * original_train_probability + 0.25 * reranker_sigmoid",
+        "fit_runs": 0,
+        "saved_condition": "history_learned",
+        "reuse": "original_ranker_policy_reranked_candidates_and_selected_evidence"
+      }
+    ],
+    "asof_feature_semantics": {
+      "historical_named_statistics": "computed_from_asof_pool_hits_only",
+      "revision_count": "one_eligible_statute_revision_per_scoped_address; guidance_keeps_original_static_semantics",
+      "capture_anchor_view": "statute_asof_dates_equals_target_date; static_guidance_dates_empty",
+      "gap_years": 0.0,
+      "best_ranks": "original_positions_in_each_saved_asof_channel",
+      "current_features_and_binding": "shared_with_history_conditions",
+      "historic_hits_or_text_inputs": false
+    },
+    "A1_training": {
+      "split": "train",
+      "all_original_train_query_ids": true,
+      "query_variants": ["exact_quote", "generated_paraphrase"],
+      "feature_names": "original_sorted_discovery_FEATURE_NAMES",
+      "feature_rows": "A0_complete_asof_address_pool_not_top10",
+      "label": "canonical_candidate_address_equals_originating_query_address",
+      "available_filter_before_fit": false,
+      "scaler": "StandardScaler_fit_on_A1_TRAIN_only",
+      "model": "LogisticRegression",
+      "C": 1.0,
+      "class_weight": "balanced",
+      "max_iter": 1000,
+      "random_state": 42,
+      "fit_runs": 1,
+      "copy_original_history_head": false,
+      "add_gold_candidate_if_missing": false
+    },
+    "primary_cohorts_per_variant": [
+      {"id": "quote_absent", "where": "split=test and target_status=available and source_quote_absent_from_target=true", "expected_n": 263, "expected_source_families": 13},
+      {"id": "available", "where": "split=test and target_status=available", "expected_n": 1580}
+    ],
+    "descriptive_cohorts_per_variant": [
+      {"id": "all_natural", "where": "split=test", "expected_n": 1586, "unavailable_n": 6, "unavailable_structural_hits": 0}
+    ],
+    "primary_endpoint": "target_parent_recall_at_4_before_support_gating",
+    "secondary_endpoints": [
+      "target_parent_mrr_at_4", "target_parent_at_1", "target_revision_at_1", "target_address_at_1",
+      "gold_address_in_complete_discovery_pool", "gold_address_in_rerank_top10",
+      "unique_address_count", "bindable_address_count", "actual_reranker_pair_count"
+    ],
+    "pool_diagnostics": ["H_A_address_intersection", "H_only_gold_address_recovery", "A_only_gold_address_recovery", "gold_binding_status"],
+    "all_pairwise_contrasts": [
+      {"id": "learning_in_history", "positive": "H1", "negative": "H0"},
+      {"id": "learning_in_asof", "positive": "A1", "negative": "A0"},
+      {"id": "history_with_learning", "positive": "H1", "negative": "A1"},
+      {"id": "history_with_fixed_head", "positive": "H0", "negative": "A0"},
+      {"id": "full_vs_asof_fixed", "positive": "H1", "negative": "A0"},
+      {"id": "asof_learning_vs_history_fixed", "positive": "A1", "negative": "H0"}
+    ],
+    "interaction": {"id": "D_by_L", "query_level_expression": "(H1-H0)-(A1-A0)"},
+    "uncertainty": {"method": "paired_source_family_cluster_bootstrap", "draws": 2000, "random_state": 42, "ci_percentiles": [2.5, 97.5], "variant_handling": "separate", "aggregation": "query_mean_within_resampled_families"},
+    "support_analysis": {
+      "enabled_by_default": false,
+      "required_for_primary_matrix_completion": false,
+      "separate_from_primary_retrieval": true,
+      "coverage_denominator_per_variant": 1586,
+      "accepted_precision_denominator": "accepted_queries",
+      "H1": "original_frozen_threshold_and_unavailable_veto",
+      "H0": "original_history_bound_own_reranker_threshold_and_baseline_veto",
+      "A1": "VALID_only_precision_target_0.90_at_fixed_alpha_0.75",
+      "A0": "VALID_only_precision_target_0.90_using_own_reranker_score_and_bound_baseline_veto",
+      "constant_learned_term_is_probability": false
+    },
+    "worker": {
+      "entry": "scripts/run_core_mechanisms.py",
+      "phases": ["fit", "evaluate"],
+      "output_root": "runs/hidate/mechanism-analysis/core-2x2",
+      "output_environment": "HIDATE_CORE_OUTPUT",
+      "phase_environment": "HIDATE_CORE_PHASE",
+      "asof_root_environment": "HIDATE_CORE_ASOF_ROOT",
+      "optional_retune_environment": "HIDATE_CORE_RETUNE_A1=1",
+      "primary_support_output": "not_evaluated_in_fixed_policy_retrieval_matrix"
+    }
+  },
+  "binding_intervention": {
+    "id": "B_fixed_address_version_realization",
+    "task": "FiscalQA_R3_scored209",
+    "cohort": "regime=R3 and scope=in",
+    "expected_questions": 209,
+    "expected_gold_article_clusters": 33,
+    "source_condition": "history_learned",
+    "frozen_stack": "Fiscal_Qwen3_Japanese_transfer",
+    "frozen_alpha": 1.0,
+    "fit_runs": 0,
+    "date_or_prompt_retuning": false,
+    "freeze_address_source": "raw_final_selected",
+    "freeze_address_field": "retrieval.conditions.history_learned.evidence",
+    "freeze_address_count": "at_most_four_distinct_article_CIDs",
+    "freeze_order": "saved_final_evidence_order",
+    "raw_vs_original_packed_census": {
+      "questions": 209,
+      "raw_slot_count_distribution": {"1": 12, "2": 20, "3": 24, "4": 153},
+      "original_packed_slot_count_distribution": {"1": 12, "2": 41, "3": 67, "4": 89},
+      "different_CID_lists": 72,
+      "difference_type": "prefix_drop",
+      "questions_with_original_packed_truncation": 121,
+      "save_per_qid_census": true
+    },
+    "when_original_pack_omitted_a_selected_address": "both_new_matched_arms_use_the_same_complete_frozen_raw_final_slots",
+    "arms": [
+      {"id": "B1_bound", "condition_tag": "binding_bound", "version_rule": "original_saved_target_date_bound_version_for_each_frozen_CID"},
+      {"id": "B0_source", "condition_tag": "binding_source", "version_rule": "same_CID_highest_fused_history_hit_revision_with_saved_hit_order_tie_break"}
+    ],
+    "source_revision_selection_uses_gold": false,
+    "same_version_pairs": "retain_in_all209",
+    "within_version_text": "whole_article_texte_clean_then_original_official_query_window_using_original_question_prompt",
+    "historical_hit_chunk_used_as_reader_text": false,
+    "header": "same_original_Fiscal_header_template_with_actual_arm_article_and_effective_dates",
+    "packing": {
+      "max_prompt_tokens": 4096,
+      "slot_identity_and_order": "identical_between_arms_and_frozen_raw_final_CID_list",
+      "headers_only_tokens": "H=max(actual_chat_template_tokens_for_all_headers_in_B0_and_B1)",
+      "initial_shared_body_token_cap": "floor((4096-H)/slot_count)",
+      "body_prefix": "longest_literal_character_prefix_with_token_count_at_most_shared_cap",
+      "render_check": "render_both_complete_prompts; if_either_exceeds4096_reduce_shared_cap_until_both_fit",
+      "slot_refill_or_independent_slot_drop": false,
+      "empty_frozen_list": "same_no_evidence_prompt_in_both_arms",
+      "packed_metadata": ["CID", "version_id", "slot_index", "window_characters", "retained_characters", "body_tokens", "shared_cap", "truncated", "actual_prompt_tokens"]
+    },
+    "reader": {
+      "model": "original_pinned_Qwen2.5_7B_Instruct",
+      "messages": "original_Fiscal_reader_messages_and_official_question_prompt",
+      "decode": {"do_sample": false, "max_new_tokens": 192},
+      "logical_outputs": 418,
+      "reuse_contract": "same_messages_rendered_token_ids_attention_mask_reader_pin_and_greedy_decode",
+      "saved_prompt_without_ids": "reconstruct_with_pinned_tokenizer_and_match_saved_prompt_tokens; label_reconstructed_saved_prompt",
+      "changed_bound_prompt": "new_matched_B1_and_B0_outputs; no_unmatched_old_bound_answer",
+      "identical_arm_prompts": "one_physical_generation_may_supply_both_labeled_outputs_with_reuse_record"
+    },
+    "primary_answer_endpoints": ["official_required_nugget_strict", "official_non_provenance_nugget_coverage"],
+    "scorer_functions": ["normalize", "parse_numbers", "match_nugget"],
+    "primary_denominator": "all209_paired_questions_without_acceptance_filter",
+    "separate_provenance_endpoints": ["article_at_1", "dated_version_at_1", "article_recall_in_actual_packed_evidence", "dated_version_recall_in_actual_packed_evidence", "official_article_citation_nugget", "gold_version_id_string_present"],
+    "version_identity_implies_answer_benefit": false,
+    "contrast": "B1_bound_minus_B0_source_per_question",
+    "paired_answer_transitions": ["both_strict_correct", "bound_only_strict_correct", "source_only_strict_correct", "both_strict_incorrect"],
+    "uncertainty": {"method": "paired_gold_article_CID_cluster_bootstrap", "draws": 2000, "random_state": 42, "ci_percentiles": [2.5, 97.5], "cluster_count": 33},
+    "descriptive_strata": ["same_version", "different_version", "identical_rendered_prompt", "different_rendered_prompt"],
+    "primary_cohort_selection_uses_outcome_or_version_change": false,
+    "worker": {
+      "entry": "scripts/run_binding_intervention.py",
+      "actions": ["prepare", "read", "score"],
+      "output_root": "runs/hidate/mechanism-analysis/binding-fiscal",
+      "frozen_slots": "frozen-addresses.jsonl",
+      "matched_prompts": "inputs.jsonl",
+      "preparation": "preparation.json",
+      "responses": "responses.jsonl",
+      "reader_receipts": "reader-receipts.jsonl",
+      "reader_work": "reader.json",
+      "scores": "scores.jsonl",
+      "summary": "evaluation.json"
+    }
+  },
+  "optional_competitive_condition": {
+    "id": "A1_VALID_retuned",
+    "enabled_by_default": false,
+    "main_factorial_member": false,
+    "ranker": "reuse_A1_asof_train_once",
+    "new_training_runs": 0,
+    "alpha_grid": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "selection": "original_VALID_available_variant_by_stratum_macro_MRR_then_smaller_alpha",
+    "support_threshold": "own_VALID_precision_target0.90",
+    "label": "competitive_asof_baseline_VALID_optimized",
+    "replaces_A1_fixed_alpha": false
+  },
+  "separate_diagnostics": {
+    "existing_feature_drop_retuned": "appendix_diagnostic_not_core_module_removal",
+    "CE_and_fusion_CPU_diagnostics": "separate_from_factorial_cells"
+  },
+  "external_baselines": {
+    "part_of_core_ablation": false,
+    "priority": ["TimelyRAG_given_date_legal_adaptation", "same_pool_LambdaMART", "HyDE_or_Query2doc", "RankGPT_Qwen", "TempRALM_optional"]
+  },
+  "outputs": {
+    "root": "runs/hidate/mechanism-analysis/core-2x2",
+    "frozen_protocol": "protocol-used.json",
+    "A1_ranker": "ranker/a1.json",
+    "A1_fitting": "fitting.json",
+    "A1_valid_candidates": "valid-reranked.jsonl",
+    "factorial_rows": "retrieval.jsonl",
+    "factorial_summary": "evaluation.json",
+    "factorial_contrasts": "paired-contrasts.csv",
+    "factorial_reachability": "reachability.csv",
+    "binding_root": "runs/hidate/mechanism-analysis/binding-fiscal",
+    "binding_census": "preparation.json",
+    "binding_frozen_slots": "frozen-addresses.jsonl",
+    "binding_prompts": "inputs.jsonl",
+    "binding_responses": "responses.jsonl",
+    "binding_scores": "scores.jsonl",
+    "binding_summary": "evaluation.json",
+    "work": "work.json",
+    "completion": "completion.json"
+  },
+  "execution": {
+    "existing_original_outputs": "read_only",
+    "stage_order": ["prepare_A0_A1_canonical_pools", "fit_A1_once_on_TRAIN", "score_missing_A_pairs_and_evaluate_fixed_factorial", "readback_H0_H1_and_compute_complete_paired_contrasts", "census_and_freeze_Fiscal_slots", "construct_jointly_packed_B_prompts", "reuse_exact_reader_inputs_and_generate_missing_outputs", "official_score_all209_pairs_and_summarize"],
+    "new_main_japanese_head_fits": 1,
+    "new_French_fits": 0,
+    "model_or_seed_search": false,
+    "missing_results": "retain_null_or_incomplete_status_not_zero"
+  }
+}

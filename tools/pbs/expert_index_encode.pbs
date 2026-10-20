@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N HIDATE_expert_encode
+#PBS -q gpu
+#PBS -l nodes=1:ppn=4:gpus=1,mem=32gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+out=data/index/hidate/expert-benchmark/corpus
+mkdir -p runs/hidate/expert-benchmark
+exec > "$out/encode.log" 2>&1
+python -X utf8 scripts/build_expert_index.py encode \
+  --original-index data/index/hidate/extended-benchmark/scale --index "$out" \
+  --stack models/ruri/model-stack.json --batch-size 32

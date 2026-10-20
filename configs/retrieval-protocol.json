@@ -1,0 +1,58 @@
+{
+  "seed": 42,
+  "query_variants": ["exact_quote", "generated_paraphrase"],
+  "paraphrase_input": "source_quote_text only; no IDs, title, dates, gold context or answer",
+  "paraphrase_decode": {"do_sample": false, "max_new_tokens": 128},
+  "backbone_training": false,
+  "ruri_attention_backend": "torch SDPA MATH with original BF16 weights and mean pooling",
+  "reader_attention_backend": "default SDPA",
+  "corpus_scope": "all families of the selected source role; query split never filters retrieval banks",
+  "history_dates": "captured anchors at or before query target date",
+  "discovery_top_k": 50,
+  "reranker_top_k": 10,
+  "reader_max_passages": 4,
+  "reader_prompt_tokens": 4096,
+  "LawQA_corpus_conditions": ["2024-09-30", "2025-11-04", "2026-09-30"],
+  "LawQA_query": "original 問題文 only; no options, context or answer",
+  "rrf_k": 60,
+  "fixed_bound_current_control": {
+    "candidate_pool": "same history-hybrid top50 addresses as the learned condition",
+    "preselect_order": ["descending current_best_cosine", "descending max_lexical_overlap_current", "descending max_history_rrf", "address"],
+    "reranker_top_k": 10,
+    "purpose": "separate supervised aggregation from the additional bound-current ranking information"
+  },
+  "chunk_body_tokens": 448,
+  "chunk_overlap_tokens": 64,
+  "rank_features": [
+    "max_history_rrf", "mean_history_rrf", "distinct_revision_count",
+    "history_best_rank_rrf", "history_best_rank_dense", "history_best_rank_bm25",
+    "current_best_cosine", "max_lexical_overlap_current", "available_target",
+    "history_latest_anchor_gap_years"
+  ],
+  "one_train_fit": {
+    "model": "StandardScaler then LogisticRegression",
+    "C": 1.0,
+    "class_weight": "balanced",
+    "max_iter": 1000,
+    "random_state": 42,
+    "label": "candidate scoped address equals originating query address; includes unavailable target addresses",
+    "training_variants": ["exact_quote", "generated_paraphrase"],
+    "candidate_scope": "history-hybrid top50 aggregated addresses from TRAIN queries only"
+  },
+  "dev_selection": {
+    "learned_reranker_mix_grid": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "mix_formula": "alpha times learned probability plus (1-alpha) times reranker sigmoid",
+    "objective": "macro mean of VALID target-address MRR across query variant and available stratum",
+    "tie_break": "smaller alpha",
+    "support_threshold": "VALID top-address precision/coverage frontier; fixed before TEST",
+    "support_target_precision": 0.90,
+    "baseline_support_calibration": "each baseline uses its own reranker sigmoid and the same empirical VALID precision target; bound baselines withhold for unavailable top ranked address",
+    "external_LawQA": "no selection or fitting"
+  },
+  "controlled_removal": {
+    "scope": "all available TEST queries, separately reported from natural TEST",
+    "operation": "one shared bank per target date: remove all available TEST gold target parents and exact NFC/whitespace-equivalent older copies of the same scoped address from both banks; make those target bindings corpus_support_unavailable",
+    "older_distinct_revisions": "remain available for address discovery, never hydrate the removed target",
+    "interpretation": "corpus support unavailable, not legal unanswerability"
+  }
+}

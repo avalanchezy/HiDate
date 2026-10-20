@@ -1,0 +1,102 @@
+{
+  "project": "HiDate",
+  "stack_id": "qwen3-0.6b",
+  "models": {
+    "reader": {
+      "model_id": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "local_path": "models/ruri/reader",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "hub_metadata": {
+        "id": "Qwen/Qwen2.5-7B-Instruct",
+        "private": false,
+        "gated": false
+      },
+      "license": "apache-2.0",
+      "license_source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+      "model_card_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+      "conventions": {
+        "interface": "AutoModelForCausalLM",
+        "chat_template": {
+          "interface": "tokenizer.apply_chat_template",
+          "source_file": "tokenizer_config.json",
+          "tokenize": false,
+          "add_generation_prompt": true
+        },
+        "default_config_context_tokens": 32768,
+        "advertised_extended_context_tokens": 131072,
+        "extended_context_requires_yarn_configuration": true,
+        "transformers_minimum_version": "4.37.0"
+      },
+      "convention_source_urls": [
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/tokenizer_config.json",
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/config.json"
+      ],
+      "download_complete": false
+    },
+    "embedding": {
+      "model_id": "Qwen/Qwen3-Embedding-0.6B",
+      "runtime": "qwen3",
+      "conventions": {
+        "interface": "AutoModel",
+        "embedding_dimension": 1024,
+        "pooling": "last_attended_token",
+        "normalization": "l2",
+        "padding_side": "left",
+        "query_format": "Instruct: {instruction}\nQuery:{query}",
+        "document_prefix": "",
+        "instruction": "Given a web search query, retrieve relevant passages that answer the query",
+        "max_sequence_tokens": 32768,
+        "experiment_max_length": 1024,
+        "transformers_minimum_version": "4.51.0"
+      },
+      "revision": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+      "local_path": "models/qwen3/embedding",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "license": "apache-2.0",
+      "hub_metadata": {
+        "id": "Qwen/Qwen3-Embedding-0.6B",
+        "private": false,
+        "gated": false
+      },
+      "model_card_url": "https://huggingface.co/Qwen/Qwen3-Embedding-0.6B/blob/97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3/README.md",
+      "download_complete": false
+    },
+    "reranker": {
+      "model_id": "Qwen/Qwen3-Reranker-0.6B",
+      "runtime": "qwen3",
+      "conventions": {
+        "interface": "AutoModelForCausalLM",
+        "padding_side": "left",
+        "input_format": "official Instruct/Query/Document template with no-thinking suffix",
+        "score": "P(yes | yes,no) at the final prompt token",
+        "receipt_logit": "yes_logit_minus_no_logit",
+        "instruction": "Given a web search query, retrieve relevant passages that answer the query",
+        "max_sequence_tokens": 32768,
+        "experiment_max_length": 1024,
+        "transformers_minimum_version": "4.51.0"
+      },
+      "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+      "local_path": "models/qwen3/reranker",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "license": "apache-2.0",
+      "hub_metadata": {
+        "id": "Qwen/Qwen3-Reranker-0.6B",
+        "private": false,
+        "gated": false
+      },
+      "model_card_url": "https://huggingface.co/Qwen/Qwen3-Reranker-0.6B/blob/e61197ed45024b0ed8a2d74b80b4d909f1255473/README.md",
+      "download_complete": false
+    }
+  },
+  "reader_reused_from": "models/ruri/model-stack.json",
+  "download_allow_patterns": [
+    "*.json",
+    "*.safetensors",
+    "*.model",
+    "*.txt",
+    "*.md"
+  ],
+  "complete": false
+}

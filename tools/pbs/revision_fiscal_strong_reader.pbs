@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N HIDATE_FR_strong_reader
+#PBS -q gpu
+#PBS -l nodes=1:ppn=2:gpus=1,mem=48gb
+#PBS -l walltime=08:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+out=runs/hidate/revision-aware/transfer/fiscal-strong-controls
+exec > "$out/reader/reader.log" 2>&1
+python -X utf8 scripts/run_revision_fiscal_ce.py read --output "$out"
+python -X utf8 scripts/run_revision_fiscal_ce.py evaluate --output "$out"

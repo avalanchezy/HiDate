@@ -1,0 +1,112 @@
+#!/bin/bash
+#PBS -N HiDate_q3_journal
+#PBS -q gpu
+#PBS -l nodes=1:ppn=4:gpus=1,mem=48gb
+#PBS -l walltime=24:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_QWEN3_RUN_DIR="runs/hidate/extended-benchmark/qwen3"
+export HIDATE_QWEN3_STAGE="start"
+run="$HIDATE_QWEN3_RUN_DIR"
+index="data/index/hidate-qwen3"
+stack="models/qwen3/model-stack.json"
+preflight="$run/preflight/preflight.json"
+mkdir -p "$run"
+exec > "$run/run.log" 2>&1
+finish() {
+    export HIDATE_QWEN3_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os, socket
+from pathlib import Path
+run = Path(os.environ["HIDATE_QWEN3_RUN_DIR"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "hostname": socket.gethostname(),
+          "exit_code": int(os.environ["HIDATE_QWEN3_EXIT_CODE"]),
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "last_stage": os.environ["HIDATE_QWEN3_STAGE"], "seed": 42,
+          "backbone_training_runs": 0, "ranker_fit_runs": 1 if (run / "ranker/address-model.json").exists() else 0}
+record["pipeline_complete"] = record["exit_code"] == 0 and record["last_stage"] == "complete"
+(run / "completion.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+}
+trap finish EXIT
+
+export HIDATE_QWEN3_STAGE="fixed_chunk_index_and_token_audit"
+python -X utf8 scripts/prepare_qwen3_index.py --source-index data/index/hidate \
+    --stack "$stack" --output-dir "$index"
+
+export HIDATE_QWEN3_STAGE="corpus_encoding"
+python -X utf8 scripts/encode_corpus.py --index-dir "$index" --stack "$stack" \
+    --preflight "$preflight" --output-dir "$index/embeddings"
+python -X utf8 - <<'PY'
+import json
+from pathlib import Path
+folder = Path("data/index/hidate-qwen3")
+audit = json.loads((folder / "qwen3-token-lengths.json").read_text(encoding="utf-8"))
+encoded = json.loads((folder / "embeddings/encoding.json").read_text(encoding="utf-8"))
+assert encoded["complete"] and encoded["dimension"] == 1024
+assert encoded["corpus_rows"] == audit["chunk_rows"]
+assert encoded["encoded_unique_texts"] == audit["unique_model_texts"]
+assert encoded["encoded_input_tokens"] == audit["expected_encoded_unique_input_tokens"]
+print(json.dumps({"fixed_chunk_qwen3_encoding_check": "PASS", "over_limit_chunk_rows": audit["over_limit_chunk_rows"]}), flush=True)
+PY
+
+export HIDATE_QWEN3_STAGE="query_encoding"
+python -X utf8 scripts/encode_queries.py --queries data/processed/hidate/queries-exact.jsonl \
+    --variant exact_quote --stack "$stack" --preflight "$preflight" --output-dir "$index/queries-exact"
+python -X utf8 scripts/encode_queries.py --queries data/processed/hidate/queries-paraphrase.jsonl \
+    --variant generated_paraphrase --stack "$stack" --preflight "$preflight" --output-dir "$index/queries-paraphrase"
+python -X utf8 scripts/encode_queries.py --queries data/processed/hidate/lawqa-retrieval-queries.jsonl \
+    --stack "$stack" --preflight "$preflight" --output-dir "$index/queries-lawqa"
+
+export HIDATE_QWEN3_STAGE="train_valid_discovery"
+python -X utf8 scripts/discover_candidates.py --index-dir "$index" \
+    --queries data/processed/hidate/queries-exact.jsonl --query-embeddings-dir "$index/queries-exact" \
+    --splits train valid --output-dir "$run/discovery/exact-train-valid"
+python -X utf8 scripts/discover_candidates.py --index-dir "$index" \
+    --queries data/processed/hidate/queries-paraphrase.jsonl --query-embeddings-dir "$index/queries-paraphrase" \
+    --splits train valid --output-dir "$run/discovery/paraphrase-train-valid"
+
+export HIDATE_QWEN3_STAGE="one_seed42_train_fit"
+python -X utf8 scripts/fit_address_ranker.py \
+    --queries data/processed/hidate/queries-exact.jsonl data/processed/hidate/queries-paraphrase.jsonl \
+    --discovery "$run/discovery/exact-train-valid/candidates.jsonl" "$run/discovery/paraphrase-train-valid/candidates.jsonl" \
+    --output "$run/ranker/address-model.json"
+
+export HIDATE_QWEN3_STAGE="valid_reranking"
+python -X utf8 scripts/rerank_development.py \
+    --queries data/processed/hidate/queries-exact.jsonl data/processed/hidate/queries-paraphrase.jsonl \
+    --discovery "$run/discovery/exact-train-valid/candidates.jsonl" "$run/discovery/paraphrase-train-valid/candidates.jsonl" \
+    --chunks "$index/chunks.jsonl" --stack "$stack" --preflight "$preflight" \
+    --ranker "$run/ranker/address-model.json" --splits valid --output-dir "$run/dev"
+
+export HIDATE_QWEN3_STAGE="freeze_valid_policy"
+python -X utf8 scripts/select_development.py --dev-dir "$run/dev" --output "$run/policy/frozen.json"
+
+export HIDATE_QWEN3_STAGE="final_discovery"
+python -X utf8 scripts/discover_final.py --index-dir "$index" \
+    --policy "$run/policy/frozen.json" --exact-query-vectors "$index/queries-exact" \
+    --paraphrase-query-vectors "$index/queries-paraphrase" --lawqa-query-vectors "$index/queries-lawqa" \
+    --output-dir "$run/final-discovery"
+
+export HIDATE_QWEN3_STAGE="final_reranking_and_reader"
+python -X utf8 scripts/evaluate_final.py --discovery-root "$run/final-discovery" \
+    --chunks "$index/chunks.jsonl" --stack "$stack" --preflight "$preflight" \
+    --policy "$run/policy/frozen.json" --ranker "$run/ranker/address-model.json" --output-dir "$run/final"
+
+export HIDATE_QWEN3_STAGE="saved_output_readback"
+python -X utf8 scripts/readback_final.py --final-dir "$run/final" \
+    --discovery-dir "$run/final-discovery" --index-dir "$index" --stack "$stack" --preflight "$preflight" \
+    --policy "$run/policy/frozen.json" --ranker "$run/ranker/address-model.json" --output "$run/final/verification.json"
+
+export HIDATE_QWEN3_STAGE="saved_output_analysis"
+python -X utf8 scripts/analyze_final.py --final-dir "$run/final" \
+    --discovery-root "$run/final-discovery" --chunks "$index/chunks.jsonl" \
+    --output-dir "$run/analysis" --report "$run/results.md"
+export HIDATE_QWEN3_STAGE="complete"

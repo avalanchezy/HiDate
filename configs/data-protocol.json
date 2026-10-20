@@ -1,0 +1,21 @@
+{
+  "seed": 42,
+  "anchor_dates": ["2018-09-30", "2021-09-30", "2024-09-30", "2026-09-30"],
+  "train_fraction": 0.70,
+  "valid_fraction": 0.15,
+  "primary_scope": "MainProvision",
+  "supervised_source_role": "full",
+  "cap_per_family_target_stratum": 25,
+  "quote_chars": 96,
+  "min_chars": 24,
+  "primary_query_strata": ["same_date", "changed_cross_date", "unavailable_target"],
+  "wording_comparison": "NFC_and_whitespace_removal",
+  "cross_date_origin": "latest_permitted_substantive_origin",
+  "query_variant": "exact_quote",
+  "quote_eligibility": "first96_prefix_has24_nonwhitespace_characters",
+  "changed_cross_date_definition": "whole_Article_visible_wording_differs",
+  "quote_presence_annotation": "NFC_whitespace_normalized_source_quote_in_target_visible_text",
+  "paraphrase_generation": "later_frozen_pretrained_model_task",
+  "external_questions": "complete_original_LawQA140",
+  "source_protocol": "configs/source-protocol.json"
+}

@@ -1,0 +1,41 @@
+#!/bin/bash
+#PBS -N HiDate_index
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=12gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+mkdir -p runs/hidate/pbs/index
+exec > runs/hidate/pbs/index/run.log 2>&1
+finish() {
+    export HIDATE_INDEX_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+manifest_path = Path("data/index/hidate/index.json")
+manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+exit_code = int(os.environ["HIDATE_INDEX_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "index_present": manifest_path.exists(), "index_complete": exit_code == 0 and manifest.get("complete", False),
+          "output_dir": "data/index/hidate", "training_runs": 0, "model_inference_runs": 0}
+if exit_code == 0:
+    record["statistics"] = {key: value for key, value in manifest["statistics"].items() if key != "chunks_by_parent"}
+    record["package_versions"] = manifest["package_versions"]
+Path("runs/hidate/pbs/index/completion.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
+    if [ "$HIDATE_INDEX_EXIT_CODE" -eq 0 ]; then
+        tar -czf hidate-cpu-index.tar.gz data/index/hidate runs/hidate/pbs/index
+    fi
+}
+trap finish EXIT
+python -m pip install 'SudachiPy==0.7.0' 'SudachiDict-core==20260723.1'
+python -X utf8 scripts/build_index.py --prepared-dir data/processed/hidate \
+    --stack models/ruri/model-stack.json --output-dir data/index/hidate

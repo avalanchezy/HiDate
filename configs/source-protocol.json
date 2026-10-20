@@ -1,0 +1,29 @@
+{
+  "seed": 42,
+  "lawqa_revision": "fce599797ce9b582045a32a5710d9197e7200959",
+  "catalogue_asof": "2026-09-30",
+  "anchor_dates": ["2018-09-30", "2021-09-30", "2024-09-30", "2026-09-30"],
+  "external_extra_dates": ["2025-11-04"],
+  "law_types": ["Act", "CabinetOrder", "MinisterialOrdinance"],
+  "count_per_type": 40,
+  "promulgation_at_most": "2018-09-30",
+  "enforcement_after": "2018-09-30",
+  "enforcement_at_most": "2026-09-30",
+  "catalogue_statuses": ["CurrentEnforced", "PreviousEnforced"],
+  "catalogue_amendment_type": "3",
+  "catalogue_mission": "New",
+  "catalogue_repeal_status": "None",
+  "lawqa_sources": "data/discovery/legal/lawqa-data-law_list.json",
+  "lawqa_questions": "data/discovery/legal/lawqa-data-selection.json",
+  "probe_law_ids": ["322AC0000000049", "129AC0000000089", "417AC0000000086"],
+  "probe_dates": ["2026-09-30"],
+  "pdf_text_command": "pdftotext -layout",
+  "guidance_archive_urls": {
+    "https://www.fsa.go.jp/common/law/kaiji/250221_kaiji.pdf": {
+      "url": "https://warp.ndl.go.jp/20250403/20250401041232/https://www.fsa.go.jp/common/law/kaiji/250221_kaiji.pdf",
+      "archive_capture": "2025-04-01T13:12:32+09:00"
+    }
+  },
+  "asof_response_is_gold": true,
+  "json_format": "full"
+}

@@ -1,0 +1,14 @@
+#!/bin/bash
+#PBS -N HIDATE_VALID_histCI
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=12gb
+#PBS -l walltime=00:30:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+OUT="${HIDATE_VALID_HISTORY_ANALYSIS_OUTPUT:-runs/hidate/revision-aware/diagnostics/history-valid-analysis}"
+mkdir -p "$OUT"
+exec > "$OUT/run.log" 2>&1
+python -X utf8 scripts/analyze_revision_valid_history.py --output "$OUT"

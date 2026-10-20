@@ -1,0 +1,115 @@
+{
+  "project": "HiDate",
+  "models": {
+    "embedding": {
+      "model_id": "cl-nagoya/ruri-v3-310m",
+      "revision": "18b60fb8c2b9df296fb4212bb7d23ef94e579cd3",
+      "local_path": "models/ruri/embedding",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "hub_metadata": {
+        "id": "cl-nagoya/ruri-v3-310m",
+        "private": false,
+        "gated": false
+      },
+      "license": "apache-2.0",
+      "license_source_url": "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/README.md",
+      "model_card_url": "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/README.md",
+      "conventions": {
+        "interface": "SentenceTransformer.encode",
+        "query_prefix": "検索クエリ: ",
+        "document_prefix": "検索文書: ",
+        "max_sequence_tokens": 8192,
+        "embedding_dimension": 768,
+        "similarity": "cosine",
+        "pooling": {
+          "word_embedding_dimension": 768,
+          "pooling_mode_cls_token": false,
+          "pooling_mode_mean_tokens": true,
+          "pooling_mode_max_tokens": false,
+          "pooling_mode_mean_sqrt_len_tokens": false,
+          "pooling_mode_weightedmean_tokens": false,
+          "pooling_mode_lasttoken": false,
+          "include_prompt": true
+        },
+        "pooling_config_file": "1_Pooling/config.json",
+        "sequence_config_file": "sentence_bert_config.json",
+        "tokenization": "SentencePiece; no external word segmentation",
+        "transformers_minimum_version": "4.48.0"
+      },
+      "convention_source_urls": [
+        "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/README.md",
+        "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/1_Pooling/config.json",
+        "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/sentence_bert_config.json",
+        "https://huggingface.co/cl-nagoya/ruri-v3-310m/blob/18b60fb8c2b9df296fb4212bb7d23ef94e579cd3/config_sentence_transformers.json"
+      ],
+      "download_complete": false
+    },
+    "reranker": {
+      "model_id": "cl-nagoya/ruri-v3-reranker-310m",
+      "revision": "bb46934ee9ed09f850b9fcff17501b3ef7ddb2b3",
+      "local_path": "models/ruri/reranker",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "hub_metadata": {
+        "id": "cl-nagoya/ruri-v3-reranker-310m",
+        "private": false,
+        "gated": false
+      },
+      "license": "apache-2.0",
+      "license_source_url": "https://huggingface.co/cl-nagoya/ruri-v3-reranker-310m/blob/bb46934ee9ed09f850b9fcff17501b3ef7ddb2b3/README.md",
+      "model_card_url": "https://huggingface.co/cl-nagoya/ruri-v3-reranker-310m/blob/bb46934ee9ed09f850b9fcff17501b3ef7ddb2b3/README.md",
+      "conventions": {
+        "interface": "CrossEncoder.predict",
+        "input_format": "raw query-document pairs",
+        "query_prefix": "",
+        "document_prefix": "",
+        "max_sequence_tokens": 8192,
+        "transformers_minimum_version": "4.48.0"
+      },
+      "convention_source_urls": [
+        "https://huggingface.co/cl-nagoya/ruri-v3-reranker-310m/blob/bb46934ee9ed09f850b9fcff17501b3ef7ddb2b3/README.md"
+      ],
+      "download_complete": false
+    },
+    "reader": {
+      "model_id": "Qwen/Qwen2.5-7B-Instruct",
+      "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+      "local_path": "models/ruri/reader",
+      "revision_source": "huggingface_hub.model_info.sha",
+      "hub_metadata": {
+        "id": "Qwen/Qwen2.5-7B-Instruct",
+        "private": false,
+        "gated": false
+      },
+      "license": "apache-2.0",
+      "license_source_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+      "model_card_url": "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+      "conventions": {
+        "interface": "AutoModelForCausalLM",
+        "chat_template": {
+          "interface": "tokenizer.apply_chat_template",
+          "source_file": "tokenizer_config.json",
+          "tokenize": false,
+          "add_generation_prompt": true
+        },
+        "default_config_context_tokens": 32768,
+        "advertised_extended_context_tokens": 131072,
+        "extended_context_requires_yarn_configuration": true,
+        "transformers_minimum_version": "4.37.0"
+      },
+      "convention_source_urls": [
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/README.md",
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/tokenizer_config.json",
+        "https://huggingface.co/Qwen/Qwen2.5-7B-Instruct/blob/a09a35458c702b33eeacc393d103063234e8bc28/config.json"
+      ],
+      "download_complete": false
+    }
+  },
+  "download_allow_patterns": [
+    "*.json",
+    "*.safetensors",
+    "*.model",
+    "*.txt",
+    "*.md"
+  ],
+  "complete": false
+}

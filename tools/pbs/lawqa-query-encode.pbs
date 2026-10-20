@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N HiDate_lawqa_encode
+#PBS -q gpu
+#PBS -l nodes=1:ppn=1:gpus=1,mem=12gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+mkdir -p runs/hidate/pbs/query-encode-lawqa
+exec > runs/hidate/pbs/query-encode-lawqa/run.log 2>&1
+trap 'status=$?; printf "%s\n" "$status" > runs/hidate/pbs/query-encode-lawqa/exit-code.txt' EXIT
+python -X utf8 scripts/encode_queries.py --variant all \
+    --queries data/processed/hidate/lawqa-retrieval-queries.jsonl --stack models/ruri/model-stack.json \
+    --preflight runs/hidate/pbs/preflight/preflight.json --output-dir data/index/hidate/queries-lawqa

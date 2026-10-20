@@ -1,0 +1,12 @@
+#!/bin/bash
+#PBS -N HIDATE_rebuild_corpus
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=24gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PYTHONPATH="$PWD/src"
+"${HIDATE_VENV:-$PWD/.venv}/bin/python" -X utf8 scripts/prepare_data.py --output-dir rebuild/prepared
+# Preserve the supplied exact queries, paraphrases, target bindings and fixed split.
+cp rebuild/prepared/corpus-passages.jsonl data/processed/hidate/corpus-passages.jsonl

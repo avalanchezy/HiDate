@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "Please cite this repository when using the HiDate code or expert-authored benchmark."
+title: "HiDate: Preserving Historical Relevance for Date-Grounded Legal Evidence Retrieval"
+type: software
+authors:
+  - family-names: Tang
+    given-names: Huiqin
+    affiliation: Changzhou Vocational Institute of Mechatronic Technology
+    orcid: "https://orcid.org/0009-0006-4822-3109"
+  - family-names: Zhu
+    given-names: Yi
+    affiliation: CREATIS Lab, INSA Lyon
+    orcid: "https://orcid.org/0009-0001-1159-6853"
+repository-code: "https://github.com/avalanchezy/HiDate"
+url: "https://github.com/avalanchezy/HiDate"
+date-released: 2026-10-20
+keywords:
+  - Temporal information retrieval
+  - Legal information retrieval
+  - Retrieval-augmented generation
+  - Versioned knowledge bases
+  - Learning to rank

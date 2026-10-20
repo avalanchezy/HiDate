@@ -1,0 +1,39 @@
+{
+  "observed_on": "2026-10-18",
+  "python": "3.10.19",
+  "torch_cuda": "12.4",
+  "packages": {
+    "torch": "2.5.0",
+    "transformers": "4.57.6",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.7.0",
+    "huggingface-hub": "0.36.2",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "scikit-learn": "1.7.2",
+    "accelerate": "1.12.0",
+    "requests": "2.32.5",
+    "SudachiPy": "0.7.0",
+    "SudachiDict-core": "20260723.1",
+    "sentencepiece": "0.2.1",
+    "protobuf": "6.33.5",
+    "PyYAML": "6.0.3",
+    "pyarrow": "17.0.0",
+    "matplotlib": "3.10.8",
+    "pandas": "2.3.3"
+  },
+  "absent_from_model_environment": [
+    "sentence-transformers",
+    "datasets",
+    "PyMuPDF",
+    "openpyxl",
+    "pytest"
+  ],
+  "note": "Package versions used for model execution and figure generation.",
+  "plot_environment": {
+    "python": "3.13.9",
+    "numpy": "2.3.5",
+    "matplotlib": "3.10.6",
+    "PyMuPDF": "1.28.2"
+  }
+}

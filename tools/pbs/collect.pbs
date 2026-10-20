@@ -1,0 +1,42 @@
+#!/bin/bash
+#PBS -N HiDate_collect
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=8gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HIDATE_MODE="${HIDATE_MODE:-probe}"
+export HIDATE_RUN_DIR="runs/hidate/pbs/collection-${HIDATE_MODE}"
+export HIDATE_SOURCE_DIR="data/raw/hidate/${HIDATE_MODE}"
+mkdir -p "$HIDATE_RUN_DIR"
+exec > "$HIDATE_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+manifest_path = Path(os.environ["HIDATE_SOURCE_DIR"]) / "manifest.json"
+manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+record = {"job_id": os.environ.get("PBS_JOBID"), "mode": os.environ["HIDATE_MODE"],
+          "exit_code": int(os.environ["HIDATE_EXIT_CODE"]),
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "manifest_present": manifest_path.exists(), "collection_complete": manifest.get("complete", False),
+          "source_output_dir": os.environ["HIDATE_SOURCE_DIR"], "training_runs": 0, "model_inference_runs": 0}
+for key in ("requested_snapshots", "successful_snapshots", "requested_guidance", "successful_guidance",
+            "successful_revision_lists", "provision_count", "failed_tasks_this_run"):
+    if key in manifest:
+        record[key] = manifest[key]
+(Path(os.environ["HIDATE_RUN_DIR"]) / "completion.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
+    if [ "$HIDATE_EXIT_CODE" -eq 0 ]; then
+        tar -czf "hidate-sources-${HIDATE_MODE}.tar.gz" "$HIDATE_SOURCE_DIR" "$HIDATE_RUN_DIR"
+    fi
+}
+trap finish EXIT
+python -X utf8 scripts/collect_sources.py --mode "$HIDATE_MODE" --output-dir "$HIDATE_SOURCE_DIR"

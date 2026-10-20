@@ -1,0 +1,13 @@
+#!/bin/bash
+#PBS -N HiDate_FiscalPrep
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=24gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+python -m pip install --no-cache-dir pyarrow==17.0.0
+python -X utf8 scripts/fiscal_benchmark.py prepare

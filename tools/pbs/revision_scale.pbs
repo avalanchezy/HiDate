@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N HIDATE_revision_scale
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=64gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+
+# Original TEST cache and predeclared native controls; no method selection.
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export CUDA_VISIBLE_DEVICES="" TOKENIZERS_PARALLELISM=false
+out="${HIDATE_REVISION_SCALE_OUTPUT:-runs/hidate/revision-aware/transfer/ruri-scale-native}"
+mkdir -p "$out"
+exec > "$out/run.log" 2>&1
+python -X utf8 scripts/run_revision_scale.py \
+    --phase "${HIDATE_REVISION_SCALE_PHASE:-all}" --scales 1000 --output "$out"

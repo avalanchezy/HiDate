@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N HiDate_expert_discovery
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=64gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export CUDA_VISIBLE_DEVICES="" TOKENIZERS_PARALLELISM=false
+out=runs/hidate/expert-benchmark/discovery
+mkdir -p "$out"
+exec > "$out/run.log" 2>&1
+trap 'code=$?; printf "%s\n" "$code" > "$out/exit-code.txt"' EXIT
+python -X utf8 scripts/run_expert_retrieval.py discover --queries data/expert-benchmark/unlabeled/queries.jsonl --gold data/expert-benchmark/sealed/gold.jsonl --query-index data/index/hidate/expert-benchmark/queries --output runs/hidate/expert-benchmark
+python -X utf8 scripts/run_expert_retrieval.py prepare --queries data/expert-benchmark/unlabeled/queries.jsonl --gold data/expert-benchmark/sealed/gold.jsonl --query-index data/index/hidate/expert-benchmark/queries --output runs/hidate/expert-benchmark

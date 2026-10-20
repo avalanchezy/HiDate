@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -N HiDate_lawqa_prep
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=4gb
+#PBS -l walltime=00:30:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+mkdir -p runs/hidate/pbs/lawqa-prepare
+exec > runs/hidate/pbs/lawqa-prepare/run.log 2>&1
+trap 'status=$?; printf "%s\n" "$status" > runs/hidate/pbs/lawqa-prepare/exit-code.txt' EXIT
+python -X utf8 scripts/prepare_lawqa.py

@@ -1,0 +1,442 @@
+{
+  "description": "Source identifier normalization mappings",
+  "mappings": [
+    {
+      "question_id": "SC002_B",
+      "evidence_id": "SC002_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "322AC1000000085",
+        "legal_scope": "SupplProvision:令和三年六月十一日法律第六十二号",
+        "article_number": "7",
+        "paragraph_item_path": "Paragraph[2]",
+        "revision_id": "322AC1000000085_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/322AC1000000085_before.txt"
+      },
+      "canonical": {
+        "law_id": "322AC1000000085",
+        "legal_scope": "SupplProvision:令和三年六月一一日法律第六二号",
+        "article_number": "7",
+        "paragraph_item_path": "Paragraph[2]",
+        "revision_id": "322AC1000000085_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/322AC1000000085_before.txt"
+      },
+      "source_slot_id": "322AC1000000085:SupplProvision:令和三年六月一一日法律第六二号:7",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC002_A",
+      "evidence_id": "SC002_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "322AC1000000085",
+        "legal_scope": "SupplProvision:令和三年六月十一日法律第六十二号",
+        "article_number": "7",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "322AC1000000085_20251001_506AC1000000080",
+        "local_source_path": "source-evidence/322AC1000000085_after.txt"
+      },
+      "canonical": {
+        "law_id": "322AC1000000085",
+        "legal_scope": "SupplProvision:令和三年六月一一日法律第六二号",
+        "article_number": "7",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "322AC1000000085_20251001_506AC1000000080",
+        "local_source_path": "source-evidence/322AC1000000085_after.txt"
+      },
+      "source_slot_id": "322AC1000000085:SupplProvision:令和三年六月一一日法律第六二号:7",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC010_B",
+      "evidence_id": "SC010_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "356AC0000000072",
+        "legal_scope": "SupplProvision:平成三十年七月六日法律第七十一号",
+        "article_number": "1",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "356AC0000000072_20180706_430AC0000000071",
+        "local_source_path": "source-evidence/356AC0000000072_before.txt"
+      },
+      "canonical": {
+        "law_id": "356AC0000000072",
+        "legal_scope": "SupplProvision:平成三〇年七月六日法律第七一号",
+        "article_number": "1",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "356AC0000000072_20180706_430AC0000000071",
+        "local_source_path": "source-evidence/356AC0000000072_before.txt"
+      },
+      "source_slot_id": "356AC0000000072:SupplProvision:平成三〇年七月六日法律第七一号:1",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC015_B",
+      "evidence_id": "SC015_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "411AC0000000165",
+        "legal_scope": "SupplProvision:平成十八年三月三十一日法律第二十四号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "411AC0000000165_20250627_507AC0000000080",
+        "local_source_path": "source-evidence/411AC0000000165_before.txt"
+      },
+      "canonical": {
+        "law_id": "411AC0000000165",
+        "legal_scope": "SupplProvision:平成一八年三月三一日法律第二四号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "411AC0000000165_20250627_507AC0000000080",
+        "local_source_path": "source-evidence/411AC0000000165_before.txt"
+      },
+      "source_slot_id": "411AC0000000165:SupplProvision:平成一八年三月三一日法律第二四号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC015_A",
+      "evidence_id": "SC015_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "411AC0000000165",
+        "legal_scope": "SupplProvision:平成十八年三月三十一日法律第二十四号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "411AC0000000165_20260401_507AC0000000080",
+        "local_source_path": "source-evidence/411AC0000000165_after.txt"
+      },
+      "canonical": {
+        "law_id": "411AC0000000165",
+        "legal_scope": "SupplProvision:平成一八年三月三一日法律第二四号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "411AC0000000165_20260401_507AC0000000080",
+        "local_source_path": "source-evidence/411AC0000000165_after.txt"
+      },
+      "source_slot_id": "411AC0000000165:SupplProvision:平成一八年三月三一日法律第二四号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC023_B",
+      "evidence_id": "SC023_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "346AC0000000112",
+        "legal_scope": "SupplProvision:平成二十九年六月二日法律第四十八号",
+        "article_number": "2",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "346AC0000000112_20210401_503AC1000000019",
+        "local_source_path": "source-evidence/346AC0000000112_before.txt"
+      },
+      "canonical": {
+        "law_id": "346AC0000000112",
+        "legal_scope": "SupplProvision:平成二九年六月二日法律第四八号",
+        "article_number": "2",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "346AC0000000112_20210401_503AC1000000019",
+        "local_source_path": "source-evidence/346AC0000000112_before.txt"
+      },
+      "source_slot_id": "346AC0000000112:SupplProvision:平成二九年六月二日法律第四八号:2",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC023_A",
+      "evidence_id": "SC023_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "346AC0000000112",
+        "legal_scope": "SupplProvision:平成二十九年六月二日法律第四十八号",
+        "article_number": "2",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "346AC0000000112_20220520_504AC0000000044",
+        "local_source_path": "source-evidence/346AC0000000112_after.txt"
+      },
+      "canonical": {
+        "law_id": "346AC0000000112",
+        "legal_scope": "SupplProvision:平成二九年六月二日法律第四八号",
+        "article_number": "2",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "346AC0000000112_20220520_504AC0000000044",
+        "local_source_path": "source-evidence/346AC0000000112_after.txt"
+      },
+      "source_slot_id": "346AC0000000112:SupplProvision:平成二九年六月二日法律第四八号:2",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC024_B",
+      "evidence_id": "SC024_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "348AC0000000112",
+        "legal_scope": "SupplProvision:昭和六十年七月十二日法律第九十号",
+        "article_number": "3",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "348AC0000000112_20240401_505AC0000000036",
+        "local_source_path": "source-evidence/348AC0000000112_before.txt"
+      },
+      "canonical": {
+        "law_id": "348AC0000000112",
+        "legal_scope": "SupplProvision:昭和六〇年七月一二日法律第九〇号",
+        "article_number": "3",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "348AC0000000112_20240401_505AC0000000036",
+        "local_source_path": "source-evidence/348AC0000000112_before.txt"
+      },
+      "source_slot_id": "348AC0000000112:SupplProvision:昭和六〇年七月一二日法律第九〇号:3",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC024_A",
+      "evidence_id": "SC024_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "348AC0000000112",
+        "legal_scope": "SupplProvision:昭和六十年七月十二日法律第九十号",
+        "article_number": "3",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "348AC0000000112_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/348AC0000000112_after.txt"
+      },
+      "canonical": {
+        "law_id": "348AC0000000112",
+        "legal_scope": "SupplProvision:昭和六〇年七月一二日法律第九〇号",
+        "article_number": "3",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "348AC0000000112_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/348AC0000000112_after.txt"
+      },
+      "source_slot_id": "348AC0000000112:SupplProvision:昭和六〇年七月一二日法律第九〇号:3",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC049_S",
+      "evidence_id": "SC049_S_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "356AC0000000072",
+        "legal_scope": "SupplProvision:昭和六十一年十二月四日法律第九十三号",
+        "article_number": "35",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "356AC0000000072_20190401_430AC0000000071",
+        "local_source_path": "source-evidence/356AC0000000072_after.txt"
+      },
+      "canonical": {
+        "law_id": "356AC0000000072",
+        "legal_scope": "SupplProvision:昭和六一年一二月四日法律第九三号",
+        "article_number": "35",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "356AC0000000072_20190401_430AC0000000071",
+        "local_source_path": "source-evidence/356AC0000000072_after.txt"
+      },
+      "source_slot_id": "356AC0000000072:SupplProvision:昭和六一年一二月四日法律第九三号:35",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC061_B",
+      "evidence_id": "SC061_B_E01",
+      "kind": "unnumbered_paragraph_slot",
+      "original": {
+        "law_id": "141AC0000000053",
+        "legal_scope": "SupplProvision:令和五年六月十四日法律第五十三号",
+        "article_number": "block",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "141AC0000000053_20251001_505AC0000000053",
+        "local_source_path": "source-evidence/141AC0000000053_before.txt"
+      },
+      "canonical": {
+        "law_id": "141AC0000000053",
+        "legal_scope": "SupplProvision:令和五年六月一四日法律第五三号",
+        "article_number": "Paragraph_1",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "141AC0000000053_20251001_505AC0000000053",
+        "local_source_path": "source-evidence/141AC0000000053_before.txt"
+      },
+      "source_slot_id": "141AC0000000053:SupplProvision:令和五年六月一四日法律第五三号:Paragraph_1",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC061_A",
+      "evidence_id": "SC061_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "141AC0000000053",
+        "legal_scope": "SupplProvision:令和八年六月二十四日法律第四十六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "141AC0000000053_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/141AC0000000053_after.txt"
+      },
+      "canonical": {
+        "law_id": "141AC0000000053",
+        "legal_scope": "SupplProvision:令和八年六月二四日法律第四六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "141AC0000000053_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/141AC0000000053_after.txt"
+      },
+      "source_slot_id": "141AC0000000053:SupplProvision:令和八年六月二四日法律第四六号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC065_B",
+      "evidence_id": "SC065_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "326AC0000000201",
+        "legal_scope": "SupplProvision:令和四年十二月九日法律第九十六号",
+        "article_number": "42",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "326AC0000000201_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/326AC0000000201_before.txt"
+      },
+      "canonical": {
+        "law_id": "326AC0000000201",
+        "legal_scope": "SupplProvision:令和四年一二月九日法律第九六号",
+        "article_number": "42",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "326AC0000000201_20250601_504AC0000000068",
+        "local_source_path": "source-evidence/326AC0000000201_before.txt"
+      },
+      "source_slot_id": "326AC0000000201:SupplProvision:令和四年一二月九日法律第九六号:42",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC065_A",
+      "evidence_id": "SC065_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "326AC0000000201",
+        "legal_scope": "SupplProvision:令和八年六月二十四日法律第四十六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "326AC0000000201_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/326AC0000000201_after.txt"
+      },
+      "canonical": {
+        "law_id": "326AC0000000201",
+        "legal_scope": "SupplProvision:令和八年六月二四日法律第四六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "326AC0000000201_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/326AC0000000201_after.txt"
+      },
+      "source_slot_id": "326AC0000000201:SupplProvision:令和八年六月二四日法律第四六号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC075_B",
+      "evidence_id": "SC075_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "426AC0000000058",
+        "legal_scope": "SupplProvision:令和七年五月二十三日法律第三十九号",
+        "article_number": "41",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000058_20260521_507AC0000000039",
+        "local_source_path": "source-evidence/426AC0000000058_before.txt"
+      },
+      "canonical": {
+        "law_id": "426AC0000000058",
+        "legal_scope": "SupplProvision:令和七年五月二三日法律第三九号",
+        "article_number": "41",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000058_20260521_507AC0000000039",
+        "local_source_path": "source-evidence/426AC0000000058_before.txt"
+      },
+      "source_slot_id": "426AC0000000058:SupplProvision:令和七年五月二三日法律第三九号:41",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC075_A",
+      "evidence_id": "SC075_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "426AC0000000058",
+        "legal_scope": "SupplProvision:令和八年六月二十四日法律第四十六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000058_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/426AC0000000058_after.txt"
+      },
+      "canonical": {
+        "law_id": "426AC0000000058",
+        "legal_scope": "SupplProvision:令和八年六月二四日法律第四六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000058_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/426AC0000000058_after.txt"
+      },
+      "source_slot_id": "426AC0000000058:SupplProvision:令和八年六月二四日法律第四六号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC128_A",
+      "evidence_id": "SC128_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "417AC0000000040",
+        "legal_scope": "SupplProvision:令和八年六月二十四日法律第四十六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "417AC0000000040_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/417AC0000000040_after.txt"
+      },
+      "canonical": {
+        "law_id": "417AC0000000040",
+        "legal_scope": "SupplProvision:令和八年六月二四日法律第四六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "417AC0000000040_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/417AC0000000040_after.txt"
+      },
+      "source_slot_id": "417AC0000000040:SupplProvision:令和八年六月二四日法律第四六号:5",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC130_B",
+      "evidence_id": "SC130_B_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "426AC0000000068",
+        "legal_scope": "SupplProvision:令和五年六月十六日法律第六十三号",
+        "article_number": "1",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000068_20260521_505AC0000000063",
+        "local_source_path": "source-evidence/426AC0000000068_before.txt"
+      },
+      "canonical": {
+        "law_id": "426AC0000000068",
+        "legal_scope": "SupplProvision:令和五年六月一六日法律第六三号",
+        "article_number": "1",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000068_20260521_505AC0000000063",
+        "local_source_path": "source-evidence/426AC0000000068_before.txt"
+      },
+      "source_slot_id": "426AC0000000068:SupplProvision:令和五年六月一六日法律第六三号:1",
+      "unique_candidate_count": 1
+    },
+    {
+      "question_id": "SC130_A",
+      "evidence_id": "SC130_A_E01",
+      "kind": "kanji_numeral_spelling",
+      "original": {
+        "law_id": "426AC0000000068",
+        "legal_scope": "SupplProvision:令和八年六月二十四日法律第四十六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000068_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/426AC0000000068_after.txt"
+      },
+      "canonical": {
+        "law_id": "426AC0000000068",
+        "legal_scope": "SupplProvision:令和八年六月二四日法律第四六号",
+        "article_number": "5",
+        "paragraph_item_path": "Paragraph[1]",
+        "revision_id": "426AC0000000068_20260624_508AC0000000046",
+        "local_source_path": "source-evidence/426AC0000000068_after.txt"
+      },
+      "source_slot_id": "426AC0000000068:SupplProvision:令和八年六月二四日法律第四六号:5",
+      "unique_candidate_count": 1
+    }
+  ]
+}

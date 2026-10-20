@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N HiDate_q3_res
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=8gb
+#PBS -l walltime=04:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_QWEN3_RESOURCE_DIR="runs/hidate/extended-benchmark/qwen3/resources"
+mkdir -p "$HIDATE_QWEN3_RESOURCE_DIR"
+exec > "$HIDATE_QWEN3_RESOURCE_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_QWEN3_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os, socket
+from pathlib import Path
+run = Path(os.environ["HIDATE_QWEN3_RESOURCE_DIR"])
+path = Path("models/qwen3/model-stack.json")
+stack = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+record = {"job_id": os.environ.get("PBS_JOBID"), "hostname": socket.gethostname(),
+          "exit_code": int(os.environ["HIDATE_QWEN3_EXIT_CODE"]),
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "resource_acquisition_complete": stack.get("complete", False),
+          "training_runs": 0, "model_inference_runs": 0}
+(run / "completion.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+if stack:
+    (run / "resource-manifest.json").write_text(json.dumps(stack, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+}
+trap finish EXIT
+python -X utf8 scripts/acquire_qwen3_models.py --output-dir models/qwen3 \
+    --reader-stack models/ruri/model-stack.json

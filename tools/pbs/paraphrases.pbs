@@ -1,0 +1,47 @@
+#!/bin/bash
+#PBS -N HiDate_paraphrases
+#PBS -q gpu
+#PBS -l nodes=1:ppn=1:gpus=1,mem=24gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+mkdir -p runs/hidate/paraphrases
+exec > runs/hidate/paraphrases/run.log 2>&1
+finish() {
+    export HIDATE_PARAPHRASE_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+manifest_path = Path("runs/hidate/paraphrases/generation.json")
+manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+exit_code = int(os.environ["HIDATE_PARAPHRASE_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "generation_present": manifest_path.exists(), "generation_complete": exit_code == 0 and manifest.get("complete", False),
+          "training_runs": 0}
+for key in ("exact_queries", "unique_source_quotes", "completed_unique_quotes", "mapped_queries", "empty_outputs",
+            "generation_calls_this_run", "prompt_tokens", "generated_tokens", "model_token_work",
+            "generation_wall_seconds_with_cuda_sync", "model_pin", "end_status_counts"):
+    if key in manifest:
+        record[key] = manifest[key]
+Path("runs/hidate/paraphrases/completion.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
+    if [ "$HIDATE_PARAPHRASE_EXIT_CODE" -eq 0 ]; then
+        tar -czf hidate-paraphrases.tar.gz data/processed/hidate/queries-paraphrase.jsonl runs/hidate/paraphrases
+    fi
+}
+trap finish EXIT
+hidate_resume_args=()
+if [ "${HIDATE_PARAPHRASE_RESUME:-0}" = "1" ]; then
+    hidate_resume_args+=(--resume)
+fi
+python -X utf8 scripts/generate_paraphrases.py --queries data/processed/hidate/queries-exact.jsonl \
+    --stack models/ruri/model-stack.json --preflight runs/hidate/pbs/preflight/preflight.json \
+    --output data/processed/hidate/queries-paraphrase.jsonl --run-dir runs/hidate/paraphrases "${hidate_resume_args[@]}"

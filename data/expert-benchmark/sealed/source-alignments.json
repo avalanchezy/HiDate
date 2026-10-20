@@ -1,0 +1,194 @@
+{
+  "evidence": [
+    {
+      "evidence_id": "SC137_B_E01",
+      "question_id": "SC137_B",
+      "annotation_origin": "author_confirmed_annotation_correction",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC1000000120?asof=2024-03-31&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        1,
+        7
+      ],
+      "paragraph_item_path": "Paragraph[1]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC137_B_E02",
+      "question_id": "SC137_B",
+      "annotation_origin": "author_confirmed_annotation_correction",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC1000000120?asof=2024-03-31&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        1,
+        8
+      ],
+      "paragraph_item_path": "Paragraph[1]/Item[2]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC137_A_E01",
+      "question_id": "SC137_A",
+      "annotation_origin": "author_confirmed_annotation_correction",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC1000000120?asof=2024-04-01&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        1,
+        7
+      ],
+      "paragraph_item_path": "Paragraph[1]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC137_A_E02",
+      "question_id": "SC137_A",
+      "annotation_origin": "author_confirmed_annotation_correction",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC1000000120?asof=2024-04-01&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        1,
+        8
+      ],
+      "paragraph_item_path": "Paragraph[1]/Item[2]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_B_E01",
+      "question_id": "SC136_B",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-24&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        1,
+        2
+      ],
+      "paragraph_item_path": "Paragraph[1]/Item[1]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_B_E02",
+      "question_id": "SC136_B",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-24&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "paragraph_item_path": "Paragraph[2]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_B_E03",
+      "question_id": "SC136_B",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-24&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "paragraph_item_path": "Paragraph[7]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_A_E01",
+      "question_id": "SC136_A",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-25&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        1,
+        2
+      ],
+      "paragraph_item_path": "Paragraph[1]/Item[1]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_A_E02",
+      "question_id": "SC136_A",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-25&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "paragraph_item_path": "Paragraph[2]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC136_A_E03",
+      "question_id": "SC136_A",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/414AC0000000190?asof=2026-06-25&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        2,
+        2,
+        2,
+        1
+      ],
+      "paragraph_item_path": "Paragraph[7]",
+      "new_independent_expert_rating": false
+    },
+    {
+      "evidence_id": "SC128_A_E02",
+      "question_id": "SC128_A",
+      "annotation_origin": "source_alignment",
+      "basis": "Explicit existing human question/reference answer and the saved official dated text",
+      "raw_source_url": "https://laws.e-gov.go.jp/api/2/law_data/417AC0000000040?asof=2026-06-24&law_full_text_format=json",
+      "source_tree_path": [
+        1,
+        13,
+        1
+      ],
+      "paragraph_item_path": "Paragraph[1]/Item[1]",
+      "new_independent_expert_rating": false
+    }
+  ],
+  "temporal_nonapplicability": {
+    "query_id": "SC128_B",
+    "temporal_evidence": {
+      "target_date": "2026-06-23",
+      "amendment_law_id": "508AC0000000046",
+      "promulgation_date": "2026-06-24",
+      "status": "not_yet_promulgated",
+      "official_amendment_url": "https://laws.e-gov.go.jp/law/508AC0000000046",
+      "amendment_metadata_field": "revision_info.amendment_promulgate_date",
+      "after_snapshot": {
+        "official_url": "https://laws.e-gov.go.jp/api/2/law_data/417AC0000000040?asof=2026-06-24&law_full_text_format=json",
+        "raw_url": "https://laws.e-gov.go.jp/api/2/law_data/417AC0000000040?asof=2026-06-24&law_full_text_format=json",
+        "revision_id": "417AC0000000040_20260624_508AC0000000046"
+      },
+      "before_snapshot": {
+        "official_url": "https://laws.e-gov.go.jp/api/2/law_data/417AC0000000040?asof=2026-06-23&law_full_text_format=json",
+        "raw_url": "https://laws.e-gov.go.jp/api/2/law_data/417AC0000000040?asof=2026-06-23&law_full_text_format=json",
+        "revision_id": "417AC0000000040_20230401_503AC0000000024"
+      },
+      "source_alignment": true,
+      "new_independent_expert_rating": false
+    },
+    "original_reference_answer_ja": "2026-06-23時点では令和八年六月二十四日法律第四十六号はまだ公布・施行されておらず（当時の最新附則は令和四年六月十七日法律第六十八号附則まで）、同法附則第一条第一号及び第五条の経過措置政令委任規定は施行されていない。",
+    "corrected_reference_answer_ja": "2026-06-23時点では令和八年六月二十四日法律第四十六号はまだ公布・施行されておらず、同法附則第一条第一号及び第五条の経過措置政令委任規定は施行されていない。"
+  },
+  "extra_expert_ratings_created": 0
+}

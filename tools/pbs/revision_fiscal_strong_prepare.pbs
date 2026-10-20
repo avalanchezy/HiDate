@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N HIDATE_FR_strong_inputs
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=16gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
+export CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+base=runs/hidate/revision-aware
+source_ce="$base/transfer/fiscal-ce"
+out="$base/transfer/fiscal-strong-controls"
+mkdir -p "$out"
+exec > "$out/prepare.log" 2>&1
+python -X utf8 scripts/run_revision_fiscal_ce.py rank --output "$out" --ce-source "$source_ce" \
+  --ce-models "$base/qwen-ce-training/models"
+python -X utf8 scripts/run_revision_fiscal_ce.py prepare-reader --output "$out" \
+  --reader-caches "$source_ce/reader" "$source_ce/reader-frozen-main" \
+  --frozen-recipe "$base/frozen-recipe.json" \
+  --reader-conditions Qwen_lambdamart_base13 Qwen_lambdamart_revision20 Full_LM18_native Lean_noalignment_LM16_native Dual_relevance_LM11_native

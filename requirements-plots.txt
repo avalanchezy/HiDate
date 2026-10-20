@@ -1,0 +1,4 @@
+# Actual local plot and PDF QA versions; use a separate plotting environment.
+numpy==2.3.5
+matplotlib==3.10.6
+PyMuPDF==1.28.2

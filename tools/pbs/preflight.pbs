@@ -1,0 +1,36 @@
+#!/bin/bash
+#PBS -N HiDate_preflight
+#PBS -q gpu
+#PBS -l nodes=1:ppn=4:gpus=1,mem=24gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_PREFLIGHT_RUN_DIR="runs/hidate/pbs/preflight"
+mkdir -p "$HIDATE_PREFLIGHT_RUN_DIR"
+exec > "$HIDATE_PREFLIGHT_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_PREFLIGHT_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os
+from pathlib import Path
+run = Path(os.environ["HIDATE_PREFLIGHT_RUN_DIR"])
+path = run / "preflight.json"
+report = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+exit_code = int(os.environ["HIDATE_PREFLIGHT_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "preflight_present": path.exists(), "preflight_status": report.get("status", "MISSING"),
+          "preflight_pass": exit_code == 0 and report.get("status") == "PASS", "training_runs": 0}
+(run / "completion.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+}
+trap finish EXIT
+python -X utf8 scripts/preflight_models.py --stack models/ruri/model-stack.json \
+    --source-dir data/raw/hidate/probe --output "$HIDATE_PREFLIGHT_RUN_DIR/preflight.json"

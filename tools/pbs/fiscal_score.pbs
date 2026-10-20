@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -N HiDate_FiscalScore
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=8gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+python -X utf8 scripts/fiscal_benchmark.py score
+python - <<'PY'
+import json, os
+from pathlib import Path
+from datetime import datetime, timezone
+root = Path('runs/hidate/fiscal-transfer/fiscal')
+report = json.loads((root / 'evaluation.json').read_text())
+expected = 221 * 11
+if not report['complete'] or report['responses'] != expected or report['expected_responses'] != expected:
+    raise ValueError('Fiscal final score requires all2431 frozen responses')
+record = {'complete': True, 'job_id': os.environ['PBS_JOBID'], 'seed': 42,
+          'finished_at_utc': datetime.now(timezone.utc).isoformat(),
+          'responses': report['responses'], 'expected_responses': expected,
+          'evaluation_path': str(root / 'evaluation.json'),
+          'training_runs': 0, 'french_fit_runs': 0, 'new_model_forward_calls': 0}
+(root / 'score-completion.json').write_text(json.dumps(record, indent=2) + '\n')
+print(json.dumps(record), flush=True)
+PY

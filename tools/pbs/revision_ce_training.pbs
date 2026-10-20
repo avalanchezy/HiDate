@@ -1,0 +1,15 @@
+#!/bin/bash
+#PBS -N HIDATE_CE_TRAIN
+#PBS -q gpu
+#PBS -l nodes=1:ppn=4:gpus=1,mem=32gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+OUT="${HIDATE_REVISION_CE_TRAIN_OUTPUT:-runs/hidate/revision-aware/ce-training}"
+mkdir -p "$OUT"
+exec > "$OUT/run.log" 2>&1
+python -X utf8 scripts/run_revision_ce_training.py --phase all --output "$OUT"

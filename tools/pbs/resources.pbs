@@ -1,0 +1,40 @@
+#!/bin/bash
+#PBS -N HiDate_resources
+#PBS -q route
+#PBS -l nodes=1:ppn=1,mem=8gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_RESOURCE_RUN_DIR="runs/hidate/pbs/resources"
+mkdir -p "$HIDATE_RESOURCE_RUN_DIR"
+exec > "$HIDATE_RESOURCE_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_RESOURCE_EXIT_CODE=$?
+    python - <<'PY'
+from datetime import datetime, timezone
+import json, os, socket
+from pathlib import Path
+run = Path(os.environ["HIDATE_RESOURCE_RUN_DIR"])
+stack_path = Path("models/ruri/model-stack.json")
+stack = json.loads(stack_path.read_text(encoding="utf-8")) if stack_path.exists() else {}
+if stack_path.exists():
+    (run / "resource-manifest.json").write_text(json.dumps(stack, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+exit_code = int(os.environ["HIDATE_RESOURCE_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "hostname": socket.gethostname(),
+          "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "model_stack_present": stack_path.exists(),
+          "resource_acquisition_complete": exit_code == 0 and stack.get("complete", False),
+          "downloaded_models": sum(row.get("download_complete", False) for row in stack.get("models", {}).values()),
+          "training_runs": 0, "model_inference_runs": 0}
+(run / "completion.json").write_text(json.dumps(record, indent=2) + "\n", encoding="utf-8")
+PY
+}
+trap finish EXIT
+python -X utf8 scripts/acquire_models.py --output-dir models/ruri

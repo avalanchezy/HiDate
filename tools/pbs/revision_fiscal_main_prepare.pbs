@@ -1,0 +1,18 @@
+#!/bin/bash
+#PBS -N HIDATE_FR_main_inputs
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=16gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts"
+export OMP_NUM_THREADS=2 OPENBLAS_NUM_THREADS=2 MKL_NUM_THREADS=2
+export CUDA_VISIBLE_DEVICES="" HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 TOKENIZERS_PARALLELISM=false
+out=runs/hidate/revision-aware/transfer/fiscal-ce
+mkdir -p "$out/reader-frozen-main"
+exec > "$out/reader-frozen-main/prepare.log" 2>&1
+python -X utf8 scripts/run_revision_fiscal_ce.py prepare-reader \
+  --output "$out" --reader-output "$out/reader-frozen-main" --reader-caches "$out/reader" \
+  --frozen-recipe runs/hidate/revision-aware/frozen-recipe.json \
+  --reader-conditions Full_LM18_historical_CE Dual_relevance_LM11_historical_CE Original_LM10_historical_CE

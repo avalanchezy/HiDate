@@ -1,0 +1,56 @@
+#!/bin/bash
+#PBS -N HiDate_dev_rerank
+#PBS -q gpu
+#PBS -l nodes=1:ppn=1:gpus=1,mem=24gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_DEV_OUTPUT_DIR="${HIDATE_DEV_OUTPUT_DIR:-runs/hidate/dev}"
+mkdir -p "$HIDATE_DEV_OUTPUT_DIR"
+exec > "$HIDATE_DEV_OUTPUT_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_DEV_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+run = Path(os.environ["HIDATE_DEV_OUTPUT_DIR"])
+path = run / "scoring.json"
+manifest = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+exit_code = int(os.environ["HIDATE_DEV_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code,
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "scoring_present": path.exists(), "scoring_complete": exit_code == 0 and manifest.get("complete", False),
+          "output_dir": str(run), "training_runs": 0}
+for key in ("query_rows", "completed_query_rows", "conditions", "logical_pair_requests", "physical_pair_count",
+            "model_call_count", "encoded_input_tokens", "padded_token_slots", "model_wall_seconds_with_cuda_sync",
+            "sdpa_backend", "condition_pair_requests", "condition_requested_input_tokens", "device", "model_pin"):
+    if key in manifest:
+        record[key] = manifest[key]
+(run / "completion.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
+    if [ "$HIDATE_DEV_EXIT_CODE" -eq 0 ]; then
+        tar -czf hidate-dev-reranked.tar.gz "$HIDATE_DEV_OUTPUT_DIR"
+    fi
+}
+trap finish EXIT
+hidate_ranker_args=()
+if [ -n "${HIDATE_DEV_RANKER:-}" ]; then
+    hidate_ranker_args+=(--ranker "$HIDATE_DEV_RANKER")
+fi
+hidate_query_paths=(data/processed/hidate/queries-exact.jsonl)
+discovery_paths=("${HIDATE_DEV_DISCOVERY:-runs/hidate/discovery/exact-train-valid/candidates.jsonl}")
+if [ "${HIDATE_DEV_INCLUDE_PARAPHRASE:-0}" = "1" ]; then
+    hidate_query_paths+=(data/processed/hidate/queries-paraphrase.jsonl)
+    discovery_paths+=("${HIDATE_DEV_PARAPHRASE_DISCOVERY:-runs/hidate/discovery/paraphrase-train-valid/candidates.jsonl}")
+fi
+python -X utf8 scripts/rerank_development.py --queries "${hidate_query_paths[@]}" \
+    --discovery "${discovery_paths[@]}" \
+    --splits valid --chunks data/index/hidate/chunks.jsonl --stack models/ruri/model-stack.json \
+    --preflight runs/hidate/pbs/preflight/preflight.json --output-dir "$HIDATE_DEV_OUTPUT_DIR" "${hidate_ranker_args[@]}"

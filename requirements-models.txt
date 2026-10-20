@@ -1,0 +1,17 @@
+# Observed HiDate environment: Python3.10.19, CUDA12.4. No sentence-transformers wrapper is used.
+torch==2.5.0
+transformers==4.57.6
+tokenizers==0.22.2
+safetensors==0.7.0
+huggingface-hub==0.36.2
+numpy==2.2.6
+scipy==1.15.3
+scikit-learn==1.7.2
+accelerate==1.12.0
+requests==2.32.5
+SudachiPy==0.7.0
+SudachiDict-core==20260723.1
+sentencepiece==0.2.1
+protobuf==6.33.5
+PyYAML==6.0.3
+pyarrow==17.0.0

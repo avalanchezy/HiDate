@@ -1,0 +1,31 @@
+#!/bin/bash
+#PBS -N HIDATE_dates_ready
+#PBS -q route
+#PBS -l nodes=1:ppn=2,mem=8gb
+#PBS -l walltime=01:00:00
+#PBS -j oe
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH" PYTHONPATH="$PWD/src:$PWD/scripts" CUDA_VISIBLE_DEVICES=""
+exec > runs/hidate/expert-dates/verify.log 2>&1
+python -X utf8 scripts/prepare_expert_dates.py census
+python -X utf8 - <<'PY'
+from pathlib import Path
+import json,os
+from datetime import datetime,timezone
+out=Path('data/raw/hidate/expert-dates')
+x=json.loads((out/'census.json').read_text())
+assert x['complete'] and x['ready_for_index'] and x['schedule_census_complete']
+assert x['expected_bindings']==x['resolved_bindings']==x['collected_bindings']==29000
+assert len(x['law_ids'])==1000 and len(x['target_dates'])==29
+assert not x['source_known_asof_mismatches'] and not x['unresolved']
+result={'complete':True,'job_id':os.environ['PBS_JOBID'],'at_utc':datetime.now(timezone.utc).isoformat(),
+    'law_count':1000,'target_dates':x['target_dates'],'collected_bindings':29000,
+    'ready_for_index':True,'required_unique_revisions':x['required_unique_revisions'],
+    'actual_asof_override_count':x['actual_asof_override_count'],
+    'actual_asof_override_law_ids':x['actual_asof_override_law_ids'],
+    'legacy_pre_enforcement_source_anomalies':x['legacy_pre_enforcement_source_anomalies'],
+    'expert_gold_read':False,'model_calls':0,'metrics_runs':0}
+(out/'final-verification.json').write_text(json.dumps(result,indent=2)+'\n')
+print(json.dumps(result),flush=True)
+PY

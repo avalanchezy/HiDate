@@ -1,0 +1,19 @@
+#!/bin/bash
+#PBS -N HiDate_address_fit
+#PBS -q route
+#PBS -l nodes=1:ppn=4,mem=32gb
+#PBS -l walltime=02:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=4 OPENBLAS_NUM_THREADS=4 MKL_NUM_THREADS=4
+mkdir -p runs/hidate/pbs/address-fit
+exec > runs/hidate/pbs/address-fit/run.log 2>&1
+trap 'status=$?; printf "%s\n" "$status" > runs/hidate/pbs/address-fit/exit-code.txt' EXIT
+python -X utf8 scripts/fit_address_ranker.py \
+    --queries data/processed/hidate/queries-exact.jsonl data/processed/hidate/queries-paraphrase.jsonl \
+    --discovery runs/hidate/discovery/exact-train-valid/candidates.jsonl runs/hidate/discovery/paraphrase-train-valid/candidates.jsonl \
+    --protocol configs/retrieval-protocol.json --output runs/hidate/ranker/address-model.json

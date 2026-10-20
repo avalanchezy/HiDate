@@ -1,0 +1,51 @@
+#!/bin/bash
+#PBS -N HiDate_query_encode
+#PBS -q gpu
+#PBS -l nodes=1:ppn=1:gpus=1,mem=24gb
+#PBS -l walltime=12:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${HIDATE_PROJECT_ROOT:-${PBS_O_WORKDIR:-$PWD}}"
+export PATH="${HIDATE_VENV:-$PWD/.venv}/bin:$PATH"
+export PYTHONPATH="$PWD/src"
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1
+export HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_HUB_DISABLE_IMPLICIT_TOKEN=1 TOKENIZERS_PARALLELISM=false
+export HIDATE_QUERY_VARIANT="${HIDATE_QUERY_VARIANT:-exact_quote}"
+case "$HIDATE_QUERY_VARIANT" in
+    exact_quote) hidate_default_output="data/index/hidate/queries-exact" ;;
+    generated_paraphrase) hidate_default_output="data/index/hidate/queries-paraphrase" ;;
+    all) hidate_default_output="data/index/hidate/queries" ;;
+    *) exit 2 ;;
+esac
+export HIDATE_QUERY_OUTPUT_DIR="${HIDATE_QUERY_OUTPUT_DIR:-$hidate_default_output}"
+export HIDATE_QUERY_RUN_DIR="runs/hidate/pbs/query-encode-${HIDATE_QUERY_VARIANT}"
+mkdir -p "$HIDATE_QUERY_RUN_DIR"
+exec > "$HIDATE_QUERY_RUN_DIR/run.log" 2>&1
+finish() {
+    export HIDATE_QUERY_EXIT_CODE=$?
+    python - <<'PY'
+import json, os
+from datetime import datetime, timezone
+from pathlib import Path
+manifest_path = Path(os.environ["HIDATE_QUERY_OUTPUT_DIR"]) / "encoding.json"
+manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+exit_code = int(os.environ["HIDATE_QUERY_EXIT_CODE"])
+record = {"job_id": os.environ.get("PBS_JOBID"), "exit_code": exit_code, "variant": os.environ["HIDATE_QUERY_VARIANT"],
+          "finished_at_utc": datetime.now(timezone.utc).isoformat(),
+          "encoding_present": manifest_path.exists(), "encoding_complete": exit_code == 0 and manifest.get("complete", False),
+          "output_dir": os.environ["HIDATE_QUERY_OUTPUT_DIR"], "training_runs": 0}
+for key in ("query_rows", "unique_model_texts", "encoded_unique_texts", "encoded_input_tokens",
+            "padded_token_slots", "encoder_wall_seconds_with_cuda_sync", "batch_count", "model_pin", "sdpa_backend"):
+    if key in manifest:
+        record[key] = manifest[key]
+(Path(os.environ["HIDATE_QUERY_RUN_DIR"]) / "completion.json").write_text(json.dumps(record, indent=2) + "\n")
+PY
+    if [ "$HIDATE_QUERY_EXIT_CODE" -eq 0 ]; then
+        tar -czf "hidate-query-vectors-${HIDATE_QUERY_VARIANT}.tar.gz" "$HIDATE_QUERY_OUTPUT_DIR" "$HIDATE_QUERY_RUN_DIR"
+    fi
+}
+trap finish EXIT
+python -X utf8 scripts/encode_queries.py --variant "$HIDATE_QUERY_VARIANT" \
+    --stack models/ruri/model-stack.json --preflight runs/hidate/pbs/preflight/preflight.json \
+    --output-dir "$HIDATE_QUERY_OUTPUT_DIR"

@@ -1,0 +1,21 @@
+{
+  "seed": 42,
+  "law_scales": [120, 500, 1000],
+  "anchor_dates": ["2018-09-30", "2021-09-30", "2024-09-30", "2026-09-30"],
+  "new_laws": 880,
+  "expected_test_queries": 3172,
+  "expected_queries_per_variant": 1586,
+  "scope": "same original natural TEST queries at all scales; original TRAIN/VALID untouched",
+  "split_policy": "no new split; new laws are distractor_only metadata, not training examples",
+  "binding_policy": "original bindings/target addresses copied; extras parse only four declared anchors; expert before/after/day_after excluded",
+  "index_policy": "original chunks.jsonl and lexical-tokens.jsonl retained as exact byte prefix; new passages deduplicate by original visible_provision passage_id with asof_dates",
+  "embedding_policy": "original Ruri model/tokenizer/conventions; copy old unique float32 vectors verbatim, encode only previously unseen complete chunk.text strings",
+  "chunk_body_tokens": 448, "chunk_overlap_tokens": 64,
+  "discovery_top_k": 50, "rrf_k": 60,
+  "reranker_top_k": 10, "evidence_passages": 4,
+  "ranker": "reuse original complete runs/hidate/ranker/address-model.json; no refit",
+  "policy": "reuse original complete runs/hidate/policy/frozen.json including alpha and seven thresholds; no reselect",
+  "conditions": ["asof_bm25", "asof_dense", "asof_hybrid", "history_unbound", "history_bound", "history_current", "history_learned"],
+  "reader_runs": 0,
+  "comparison": "all three scales rerun uniformly in one worker using same frozen original stack and exact pair cache; 120 is the contemporaneous baseline"
+}
